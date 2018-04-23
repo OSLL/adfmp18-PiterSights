@@ -9,28 +9,28 @@ import android.util.Log
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity()
-        , BlankFragment.OnBlankFragmentInteractionListener
+        , MenuFragment.OnMenuFragmentInteractionListener
         , TestFragment.OnTestFragmentInteractionListener
 {
-    private var blankFragment: BlankFragment = BlankFragment()
+    private var menuFragment: MenuFragment = MenuFragment()
     private var testFragment: TestFragment = TestFragment()
 
     private var lastFragment: Fragment? = null
 
     override fun onTestFragmentInteraction(uri: Uri) {
-        Log.i("MainActivity", "onTestFragmentInteraction")
+        Log.d("MainActivity", "onTestFragmentInteraction")
     }
 
-    override fun onBlankFragmentInteraction(uri: Uri) {
-        Log.i("MainActivity", "onBlankFragmentInteraction")
+    override fun onMenuFragmentInteraction(uri: Uri) {
+        Log.d("MainActivity", "onMenuFragmentInteraction")
     }
 
-    private fun setFragment(fragment: Fragment) {
+    private fun setFragment(fragment: Fragment, containerId: Int = R.id.container) {
         if (fragment == lastFragment)
             return
-        getSupportFragmentManager().beginTransaction().replace(R.id.container, fragment).commit()
+        getSupportFragmentManager().beginTransaction().replace(containerId, fragment).commit()
         lastFragment = fragment
-        Log.i("MainActivity", "setting fragment: " + fragment.toString())
+        Log.d("MainActivity", "setting fragment: " + fragment.toString())
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -38,14 +38,7 @@ class MainActivity : AppCompatActivity()
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
 
+        setFragment(menuFragment, R.id.menu_buttons_container)
         setFragment(testFragment)
-
-        button.setOnClickListener({
-            setFragment(testFragment)
-        })
-
-        button2.setOnClickListener({
-            setFragment(blankFragment)
-        })
     }
 }

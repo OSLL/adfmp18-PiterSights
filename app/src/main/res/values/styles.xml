@@ -17,9 +17,23 @@
 
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
-    <style name="AppTheme.Button" parent="Base.Widget.AppCompat.ImageButton">
-        <item name="android:layout_width">100dp</item>
-        <item name="android:layout_height">100dp</item>
+    <style name="AppTheme.ImageButton" parent="Base.Widget.AppCompat.ImageButton">
+        <item name="android:layout_width">@dimen/button_size</item>
+        <item name="android:layout_height">@dimen/button_size</item>
+        <item name="android:scaleType">fitCenter</item>
+        <item name="android:background">@drawable/round_button</item>
+        <item name="android:gravity">center_vertical|center_horizontal</item>
+    </style>
+
+    <style name="AppTheme.Button" parent="Base.Widget.AppCompat.Button">
+        <item name="android:layout_width">@dimen/button_size</item>
+        <item name="android:layout_height">@dimen/button_size</item>
+        <item name="android:scaleType">fitCenter</item>
+        <item name="android:background">@drawable/round_button</item>
+        <item name="android:padding">0dp</item>
+        <item name="android:textAlignment">center</item>
+        <item name="android:textColor">@color/colorPrimary</item>
+        <item name="android:textSize">3pt</item>
     </style>
 
 </resources>
