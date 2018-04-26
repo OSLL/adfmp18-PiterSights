@@ -71,6 +71,6 @@ class MapFragment : Fragment(), OnMapReadyCallback {
      */
     interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
-        fun onFragmentInteraction(uri: Uri)
+        fun onMapFragmentInteraction(uri: Uri)
     }
 }

@@ -10,19 +10,18 @@ import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity()
         , MenuFragment.OnMenuFragmentInteractionListener
-        , TestFragment.OnTestFragmentInteractionListener
+        , MapFragment.OnFragmentInteractionListener
 {
     private var menuFragment: MenuFragment = MenuFragment()
-    private var testFragment: TestFragment = TestFragment()
-
+    private var mapFragment: MapFragment = MapFragment()
     private var lastFragment: Fragment? = null
-
-    override fun onTestFragmentInteraction(uri: Uri) {
-        Log.d("MainActivity", "onTestFragmentInteraction")
-    }
 
     override fun onMenuFragmentInteraction(uri: Uri) {
         Log.d("MainActivity", "onMenuFragmentInteraction")
+    }
+
+    override fun onMapFragmentInteraction(uri: Uri) {
+        Log.d("MainActivity", "onMapFragmentInteraction")
     }
 
     private fun setFragment(fragment: Fragment, containerId: Int = R.id.container) {
@@ -38,7 +37,7 @@ class MainActivity : AppCompatActivity()
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
 
+        setFragment(mapFragment, R.id.map)
         setFragment(menuFragment, R.id.menu_buttons_container)
-        setFragment(testFragment)
     }
 }
