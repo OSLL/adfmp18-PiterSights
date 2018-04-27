@@ -14,15 +14,6 @@ import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 
-/**
- * A simple [Fragment] subclass.
- * Activities that contain this fragment must implement the
- * [LoadingFragment.OnFragmentInteractionListener] interface
- * to handle interaction events.
- * Use the [LoadingFragment.newInstance] factory method to
- * create an instance of this fragment.
- *
- */
 class MapFragment : Fragment(), OnMapReadyCallback {
 
     private lateinit var mMap: GoogleMap
@@ -38,16 +29,18 @@ class MapFragment : Fragment(), OnMapReadyCallback {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-        val mapFragment = fragmentManager!!.findFragmentById(R.id.map) as SupportMapFragment
-        mapFragment.getMapAsync(this)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
-        // Inflate the layout for this fragment
+//        // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_map, container, false)
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        val supportMapFragment = childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
+        supportMapFragment.getMapAsync(this)
     }
 
     override fun onAttach(context: Context) {
@@ -58,17 +51,6 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         }
     }
 
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     *
-     *
-     * See the Android Training lesson [Communicating with Other Fragments]
-     * (http://developer.android.com/training/basics/fragments/communicating.html)
-     * for more information.
-     */
     interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
         fun onMapFragmentInteraction(uri: Uri)
