@@ -28,14 +28,14 @@ class LoadingFragment : Fragment() {
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
-        if (context is OnFragmentInteractionListener) {
+        if (context is OnLoadingFragmentInteractionListener) {
         } else {
-            throw RuntimeException(context.toString() + " must implement OnFragmentInteractionListener")
+            throw RuntimeException(context.toString() + " must implement OnLoadingFragmentInteractionListener")
         }
     }
 
-    interface OnFragmentInteractionListener {
+    interface OnLoadingFragmentInteractionListener {
         // TODO: Update argument type and name
-        fun onFragmentInteraction(uri: Uri)
+        fun onLoadingFragmentInteraction(uri: Uri)
     }
 }

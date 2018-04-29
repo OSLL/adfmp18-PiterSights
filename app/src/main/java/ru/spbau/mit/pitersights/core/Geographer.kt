@@ -8,7 +8,7 @@ class Geographer {
         return emptyMap()
     }
 
-    fun detectSigth(player: Player, neighbors: Map<Sight, String>): Sight? {
+    fun detectSight(player: Player, neighbors: Map<Sight, String>): Sight? {
         // определяет объект, на который мы смотрим, либо его отсутсвие
         return null
     }

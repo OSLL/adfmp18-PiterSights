@@ -47,7 +47,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         super.onAttach(context)
         if (context is OnFragmentInteractionListener) {
         } else {
-            throw RuntimeException(context.toString() + " must implement OnFragmentInteractionListener")
+            throw RuntimeException(context.toString() + " must implement OnLoadingFragmentInteractionListener")
         }
     }
 

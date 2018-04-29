@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".SightFragment">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:ignore="UselessParent">
+
+        <ImageView
+            android:id="@+id/sight_preview_image"
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"
+            android:src="@drawable/logo"
+            android:contentDescription="SightPhoto" />
+
+        <TextView
+            android:id="@+id/sight_preview_label"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/sight_preview_image"
+            android:layout_margin="16dp"
+            android:text="@string/sight_label" />
+
+        <TextView
+            android:id="@+id/sight_preview_description"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/sight_preview_label"
+            android:layout_margin="16dp"
+            android:text="@string/sight_description"/>
+
+    </RelativeLayout>
+
+
+
+</FrameLayout>

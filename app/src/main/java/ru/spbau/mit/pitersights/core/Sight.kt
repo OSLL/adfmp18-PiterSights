@@ -1,19 +1,30 @@
 package ru.spbau.mit.pitersights.core
 
-class Sight(private val _name: String, private val sigthsResource: String) { // нам нужно откуда то извлекать позицию и описание, я пока не знаю откуда
+import android.os.Parcel
+import android.os.Parcelable
+
+// TODO нам нужно откуда то извлекать позицию и описание, я пока не знаю откуда
+// TODO geoPosition structure.
+data class Sight(val name: String,
+            val description: List<String> = emptyList<String>(), // три элемента
+            val imageResource: Int,
+            val geoPosition: String = "") : Parcelable {
     val id = IdSetter.create(); get
-    val geoPosition = ""; get // это не строка, но пока пусть будет строка
 
-    val name: String
-        get() = _name
-
-    private val description = emptyList<String>() // три элемента
     var _photo: String = ""
     var photo: String
         get() = _photo
         set(value) {
             _photo = value
         }
+
+    constructor(parcel: Parcel) : this(
+            parcel.readString(),
+            parcel.createStringArrayList(),
+            parcel.readInt(),
+            parcel.readString()) {
+        _photo = parcel.readString()
+    }
 
     fun getFullDescription() = description.get(0)
     fun getCameraDescription() = description.get(1)
@@ -27,6 +38,28 @@ class Sight(private val _name: String, private val sigthsResource: String) { // 
             id
         }
     }
+
+    override fun writeToParcel(parcel: Parcel, flags: Int) {
+        parcel.writeString(name)
+        parcel.writeStringList(description)
+        parcel.writeInt(imageResource)
+        parcel.writeString(geoPosition)
+        parcel.writeString(_photo)
+    }
+
+    override fun describeContents(): Int {
+        return 0
+    }
+
+//    object CREATOR : Parcelable.Creator<Sight> {
+//        override fun createFromParcel(parcel: Parcel): Sight {
+//            return Sight(parcel)
+//        }
+//
+//        override fun newArray(size: Int): Array<Sight?> {
+//            return arrayOfNulls(size)
+//        }
+//    }
 }
 
-data class Sights(private var sights: Map<Int, Sight> = emptyMap())
+//data class Sights(private var sights: Map<Int, Sight> = emptyMap())
