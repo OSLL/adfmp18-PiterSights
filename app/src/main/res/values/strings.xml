@@ -16,4 +16,6 @@
     <string name="about_button_description">About</string>
     <string name="take_photo_button_description">Take Photo</string>
     <string name="goto_photo_button_description">Goto Photo</string>
+
+    <string name="google_directions_api_key">AIzaSyCxPHc3awJKMgrJCqYm5oOgNIVppLA_CBE</string>
 </resources>
