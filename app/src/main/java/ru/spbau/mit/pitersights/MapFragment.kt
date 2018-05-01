@@ -58,6 +58,7 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerClickListe
     // The geographical location where the device is currently located. That is, the last-known
     // location retrieved by the Fused Location Provider.
     private var mLastKnownLocation: Location? = null
+    private var mCurrentRoute: Polyline? = null
 
     // Keys for storing activity state.
     private val KEY_CAMERA_POSITION = "camera_position"
@@ -69,6 +70,7 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerClickListe
     private var mLikelyPlaceAddresses: Array<String>? = null
     private var mLikelyPlaceAttributions: Array<String>? = null
     private var mLikelyPlaceLatLngs: Array<LatLng?>? = null
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -293,18 +295,18 @@ class MapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerClickListe
         marker?.showInfoWindow()
         val dest = marker?.position
         val selfLocation = mLastKnownLocation
-//        val selfLocation = if (mLastKnownLocation != null) LatLng(mLastKnownLocation.latitude)
-        if (selfLocation != null) {
-            if (dest != null) {
-                val result = DirectionsApi.newRequest(mGeoApiContext)
-                        .mode(TravelMode.WALKING)
-                        .origin(com.google.maps.model.LatLng(selfLocation.latitude, selfLocation.longitude))
-                        .destination(com.google.maps.model.LatLng(dest.latitude, dest.longitude))
-                        .await()
+        if (selfLocation != null && dest != null) {
+            val result = DirectionsApi.newRequest(mGeoApiContext)
+                    .mode(TravelMode.WALKING)
+                    .origin(com.google.maps.model.LatLng(selfLocation.latitude, selfLocation.longitude))
+                    .destination(com.google.maps.model.LatLng(dest.latitude, dest.longitude))
+                    .await()
 
-                val decodedPath = PolyUtil.decode(result.routes[0].overviewPolyline.getEncodedPath())
-                mMap.addPolyline(PolylineOptions().addAll(decodedPath))
-            }
+            val decodedPath = PolyUtil.decode(
+                    result.routes[0].overviewPolyline.encodedPath
+            )
+            mCurrentRoute?.remove()
+            mCurrentRoute = mMap.addPolyline(PolylineOptions().addAll(decodedPath))
         }
         return true
     }
