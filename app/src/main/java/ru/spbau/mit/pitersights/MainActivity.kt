@@ -7,6 +7,7 @@ import android.support.v7.app.AppCompatActivity
 import android.util.Log
 
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.fragment_camera.*
 import ru.spbau.mit.pitersights.core.Sight
 import java.io.Serializable
 
@@ -16,6 +17,7 @@ class MainActivity : AppCompatActivity()
         , MapFragment.OnFragmentInteractionListener
         , HistoryFragment.OnHistoryFragmentInteractionListener
         , SightFragment.OnSightFragmentInteractionListener
+        , CameraViewFragment.OnCameraFragmentInteractionListener
 {
     private val LOG_TAG = "MainActivity"
 
@@ -24,6 +26,7 @@ class MainActivity : AppCompatActivity()
     private var mapFragment: MapFragment = MapFragment()
     private var historyFragment: HistoryFragment = HistoryFragment.newInstance(3)
     private var sightFragment: SightFragment = SightFragment()
+    private var cameraViewFragment: CameraViewFragment = CameraViewFragment()
 
     private var lastFragment: Fragment? = null
 
@@ -37,6 +40,10 @@ class MainActivity : AppCompatActivity()
 
     override fun onMapFragmentInteraction(uri: Uri) {
         Log.d(LOG_TAG, "onMapFragmentInteraction")
+    }
+
+    override fun onCameraFragmentInteraction(uri: Uri) {
+        Log.d(LOG_TAG, "onCameraFragmentInteraction")
     }
 
     override fun onHistoryFragmentInteraction(sight: Sight?) {
@@ -53,7 +60,8 @@ class MainActivity : AppCompatActivity()
 
     override fun gotoPhoto() {
         Log.d(LOG_TAG, "Going to Photo")
-        TODO("Implement photo screen.")
+        title = getString(R.string.title_fragment_camera)
+        setFragment(cameraViewFragment)
     }
 
     override fun gotoMap() {
