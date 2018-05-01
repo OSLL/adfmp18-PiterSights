@@ -58,6 +58,8 @@ class CameraViewFragment: Fragment() {
 
                 if (permission == PackageManager.PERMISSION_GRANTED) {
                     manager.openCamera(cameraId, mStateCallback, null)
+                } else {
+                    TODO("add requesting permissions: https://goo.gl/Yc4K2o")
                 }
             } catch(e: CameraAccessException) {}
         }

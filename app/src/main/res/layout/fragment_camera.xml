@@ -24,7 +24,6 @@
         android:layout_alignParentEnd="true"
         android:layout_alignParentTop="true"
         android:orientation="vertical">
-
     </LinearLayout>
 
 </RelativeLayout>

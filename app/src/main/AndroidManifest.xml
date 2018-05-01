@@ -11,7 +11,7 @@
 
     <!-- To access Google+ APIs: -->
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-feature android:name="com.android.hardware.camera2.full"/>
+    <uses-feature android:name="com.android.hardware.camera2.full" android:required="true"/>
     <uses-permission android:name="android.permission.CAMERA"/>
 
     <application
