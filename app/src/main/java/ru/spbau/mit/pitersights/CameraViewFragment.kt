@@ -45,7 +45,7 @@ class CameraViewFragment: Fragment(), ActivityCompat.OnRequestPermissionsResultC
             Toast.makeText(cameraView.context, R.string.picture_taken, Toast.LENGTH_SHORT)
                     .show()
             getBackgroundHandler().post(Runnable {
-                val file = File(Environment.getExternalStorageDirectory(),
+                val file = File(requireContext().getExternalFilesDir(Environment.DIRECTORY_PICTURES),
                         "picture.jpg")
                 var os: OutputStream? = null
                 try {
@@ -83,8 +83,7 @@ class CameraViewFragment: Fragment(), ActivityCompat.OnRequestPermissionsResultC
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         mCameraView = camera as CameraView
-        mCameraView!!.addCallback(mCallback);
-//        takePhotoButton.setOnClickListener(mOnClickListener)
+        mCameraView!!.addCallback(mCallback)
     }
 
     override fun onResume() {
