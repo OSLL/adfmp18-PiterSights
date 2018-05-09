@@ -7,9 +7,7 @@ import android.support.v7.app.AppCompatActivity
 import android.util.Log
 
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.android.synthetic.main.fragment_camera.*
 import ru.spbau.mit.pitersights.core.Sight
-import java.io.Serializable
 
 class MainActivity : AppCompatActivity()
         , LoadingFragment.OnLoadingFragmentInteractionListener
@@ -34,17 +32,13 @@ class MainActivity : AppCompatActivity()
         Log.d(LOG_TAG, "onLoadingFragmentInteraction")
     }
 
-    override fun onMenuFragmentInteraction(uri: Uri) {
-        Log.d(LOG_TAG, "onMenuFragmentInteraction")
+    override fun onTakePhotoButtonClicked() {
+        cameraViewFragment.takePicture()
     }
 
     override fun onMapFragmentInteraction(uri: Uri) {
         Log.d(LOG_TAG, "onMapFragmentInteraction")
     }
-
-//    override fun onCameraFragmentInteraction(uri: Uri) {
-//        Log.d(LOG_TAG, "onCameraFragmentInteraction")
-//    }
 
     override fun onHistoryFragmentInteraction(sight: Sight?) {
         Log.d("MainActivity", "onHistoryFragmentInteraction")
@@ -111,6 +105,5 @@ class MainActivity : AppCompatActivity()
 
         setFragment(loadingFragment, R.id.container, false)
         setFragment(menuFragment, R.id.menu_buttons_container, false)
-        gotoPhoto()
     }
 }

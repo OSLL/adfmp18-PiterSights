@@ -22,23 +22,12 @@ import android.support.v4.content.ContextCompat
 import android.os.Build
 import android.support.annotation.NonNull
 import kotlinx.android.synthetic.main.fragment_camera.*
-import kotlinx.android.synthetic.main.fragment_menu.*
-
 
 class CameraViewFragment: Fragment(), ActivityCompat.OnRequestPermissionsResultCallback {
     private var mCameraView: CameraView? = null
     private val REQUEST_CAMERA_PERMISSION = 1
 
     private var mBackgroundHandler: Handler? = null
-
-    private val mOnClickListener = object : View.OnClickListener {
-        override fun onClick(v: View) {
-            when (v.getId()) {
-                // можно ли фотографировать? добавить обработку
-                R.id.takePhotoButton -> mCameraView?.takePicture()
-            }
-        }
-    }
 
     private val mCallback = object : CameraView.Callback() {
 
@@ -94,8 +83,8 @@ class CameraViewFragment: Fragment(), ActivityCompat.OnRequestPermissionsResultC
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         mCameraView = camera as CameraView
-        mCameraView?.addCallback(mCallback);
-        takePhotoButton.setOnClickListener(mOnClickListener)
+        mCameraView!!.addCallback(mCallback);
+//        takePhotoButton.setOnClickListener(mOnClickListener)
     }
 
     override fun onResume() {
@@ -147,5 +136,10 @@ class CameraViewFragment: Fragment(), ActivityCompat.OnRequestPermissionsResultC
                 }
             }
         }
+    }
+
+    fun takePicture() {
+        Log.i("CameraViewFragment", "TakingPicture")
+        mCameraView!!.takePicture()
     }
 }
