@@ -17,7 +17,7 @@ class MainActivity : AppCompatActivity()
         , MapFragment.OnFragmentInteractionListener
         , HistoryFragment.OnHistoryFragmentInteractionListener
         , SightFragment.OnSightFragmentInteractionListener
-        , CameraViewFragment.OnCameraFragmentInteractionListener
+//        , CameraViewFragment.OnCameraFragmentInteractionListener
 {
     private val LOG_TAG = "MainActivity"
 
@@ -42,9 +42,9 @@ class MainActivity : AppCompatActivity()
         Log.d(LOG_TAG, "onMapFragmentInteraction")
     }
 
-    override fun onCameraFragmentInteraction(uri: Uri) {
-        Log.d(LOG_TAG, "onCameraFragmentInteraction")
-    }
+//    override fun onCameraFragmentInteraction(uri: Uri) {
+//        Log.d(LOG_TAG, "onCameraFragmentInteraction")
+//    }
 
     override fun onHistoryFragmentInteraction(sight: Sight?) {
         Log.d("MainActivity", "onHistoryFragmentInteraction")
@@ -111,6 +111,6 @@ class MainActivity : AppCompatActivity()
 
         setFragment(loadingFragment, R.id.container, false)
         setFragment(menuFragment, R.id.menu_buttons_container, false)
-        gotoHistory()
+        gotoPhoto()
     }
 }

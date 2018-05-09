@@ -17,4 +17,8 @@
     <string name="about_button_description">About</string>
     <string name="take_photo_button_description">Take Photo</string>
     <string name="goto_photo_button_description">Goto Photo</string>
+
+    <string name="picture_taken">Picture taken</string>
+    <string name="camera_permission_confirmation">This app demonstrates the usage of CameraView. In order to do that, it needs permission to access camera.</string>
+    <string name="camera_permission_not_granted">Camera app cannot do anything without camera permission.</string>
 </resources>
