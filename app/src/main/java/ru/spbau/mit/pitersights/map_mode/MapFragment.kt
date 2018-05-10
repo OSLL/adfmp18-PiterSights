@@ -1,10 +1,9 @@
-package ru.spbau.mit.pitersights
+package ru.spbau.mit.pitersights.map_mode
 
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.pm.PackageManager
 import android.location.Location
-import android.location.LocationListener
 import android.net.Uri
 import android.os.Bundle
 import android.support.v4.app.ActivityCompat
@@ -28,17 +27,21 @@ import com.google.maps.DirectionsApi
 import com.google.maps.GeoApiContext
 import com.google.maps.android.PolyUtil
 import com.google.maps.model.TravelMode
-import ru.spbau.mit.pitersights.core.Sight
+import ru.spbau.mit.pitersights.R
 import java.util.concurrent.TimeUnit
 
 class MapFragment : Fragment(), OnMapReadyCallback {
-    var sights: List<Sight> = emptyList()
     private lateinit var mMap: GoogleMap
+
     private lateinit var mCameraPosition: CameraPosition
 
+    // The entry points to the Places API.
     private var mGeoDataClient: GeoDataClient? = null
     private var mPlaceDetectionClient: PlaceDetectionClient? = null
+
     private var mGeoApiContext: GeoApiContext? = null
+
+    // The entry point to the Fused Location Provider.
     private var mFusedLocationProviderClient: FusedLocationProviderClient? = null
 
     private val mDefaultLocation = LatLng(-33.8523341, 151.2106085)
@@ -47,11 +50,14 @@ class MapFragment : Fragment(), OnMapReadyCallback {
     private var mLocationPermissionGranted: Boolean = false
 
     private var mLastKnownLocation: Location? = null
-    private val PROXIMITY_RADIUS = 10000
     private var mCurrentRoute: Polyline? = null
 
     private val KEY_CAMERA_POSITION = "camera_position"
     private val KEY_LOCATION = "location"
+
+    // Used for selecting the current place.
+    private val M_MAX_ENTRIES = 2000
+    private var mPlaceNames: Array<String?>? = null
     private var mPlaceLatLngs: Array<LatLng?>? = null
 
 
@@ -72,7 +78,9 @@ class MapFragment : Fragment(), OnMapReadyCallback {
                 .setWriteTimeout(1, TimeUnit.SECONDS)
     }
 
-
+    /**
+     * Saves the state of the map when the activity is paused.
+     */
     override fun onSaveInstanceState(outState: Bundle) {
         outState.putParcelable(KEY_CAMERA_POSITION, mMap.cameraPosition)
         outState.putParcelable(KEY_LOCATION, mLastKnownLocation)
@@ -91,6 +99,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
             }
 
             override fun getInfoContents(marker: Marker): View {
+                // Inflate the layouts for the info window, title and snippet.
                 val infoWindow = layoutInflater.inflate(R.layout.map_sight_description, null)
 
                 val title = infoWindow.findViewById(R.id.tv_title) as TextView
@@ -122,12 +131,25 @@ class MapFragment : Fragment(), OnMapReadyCallback {
             }
         })
 
+        // Prompt the user for permission.
         getLocationPermission()
+
+        // Turn on the My Location layer and the related control on the map.
         updateLocationUI()
+
+        // Get the current location of the device and set the position of the map.
         getDeviceLocation()
+        showCurrentPlace()
     }
 
+    /**
+     * Gets the current location of the device, and positions the map's camera.
+     */
     private fun getDeviceLocation() {
+        /*
+         * Get the best and most recent location of the device, which may be null in rare
+         * cases when a location is not available.
+         */
         try {
             if (mLocationPermissionGranted) {
                 val locationResult = mFusedLocationProviderClient?.lastLocation
@@ -135,14 +157,11 @@ class MapFragment : Fragment(), OnMapReadyCallback {
                     if (task.isSuccessful) {
                         // Set the map's camera position to the current location of the device.
                         mLastKnownLocation = task.result
-                        Log.i(tag, "current location: $mLastKnownLocation")
                         val location = mLastKnownLocation
                         if (location != null) {
                             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
                                     LatLng(location.latitude,
                                             location.longitude), DEFAULT_ZOOM.toFloat()))
-
-                         showCurrentPlace()
                         }
                     } else {
                         Log.d(tag, "Current location is null. Using defaults.")
@@ -159,7 +178,9 @@ class MapFragment : Fragment(), OnMapReadyCallback {
 
     }
 
-
+    /**
+     * Prompts the user for permission to use the device location.
+     */
     private fun getLocationPermission() {
         if (context?.let {
                     ActivityCompat.checkSelfPermission(it,
@@ -172,13 +193,16 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         }
     }
 
-
+    /**
+     * Handles the result of the request for location permissions.
+     */
     override fun onRequestPermissionsResult(requestCode: Int,
                                             permissions: Array<String>,
                                             grantResults: IntArray) {
         mLocationPermissionGranted = false
         when (requestCode) {
             PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION -> {
+                // If request is cancelled, the result arrays are empty.
                 if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     mLocationPermissionGranted = true
                 }
@@ -187,33 +211,48 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         updateLocationUI()
     }
 
+    /**
+     * Prompts the user to select the current place from a list of likely places, and shows the
+     * current place on the map - provided the user has granted location permission.
+     */
     @SuppressLint("MissingPermission")
     private fun showCurrentPlace() {
         if (mLocationPermissionGranted) {
-            val currentLocation = mLastKnownLocation
-            val url = getUrl(
-                    currentLocation!!.latitude,
-                    currentLocation.longitude,
-                    "point_of_interest")
-            val getNearbyPlacesData = NearbyPlacesGetter()
-            getNearbyPlacesData.execute(mMap, url)
+            val placeResult = mPlaceDetectionClient?.getCurrentPlace(null)
+            placeResult?.addOnCompleteListener { task ->
+                if (task.isSuccessful && task.result != null) {
+                    val likelyPlaces = task.result
+
+                    // Set the count, handling cases where less than 5 entries are returned.
+                    val count: Int
+                    if (likelyPlaces.count < M_MAX_ENTRIES) {
+                        count = likelyPlaces.count
+                    } else {
+                        count = M_MAX_ENTRIES
+                    }
+
+                    var i = 0
+                    mPlaceNames = arrayOfNulls(count)
+                    mPlaceLatLngs = arrayOfNulls(count)
+
+                    for (placeLikelihood in likelyPlaces) {
+                        mPlaceNames?.set(i, placeLikelihood.place.name as String)
+                        mPlaceLatLngs!![i] = placeLikelihood.place.latLng
+                        i++
+                        if (i > count - 1) {
+                            break
+                        }
+                    }
+
+                    likelyPlaces.release()
+                    openPlacesDialog()
+                } else {
+                    Log.e(tag, "Exception: %s", task.exception)
+                }
+            }
         } else {
             getLocationPermission()
         }
-    }
-
-    private fun getUrl(latitude: Double, longitude: Double, nearbyPlace: String): String {
-
-        val googlePlacesUrl = StringBuilder(
-                "https://maps.googleapis.com/maps/api/place/nearbysearch/json?"
-        )
-        googlePlacesUrl.append("location=$latitude,$longitude")
-        googlePlacesUrl.append("&radius=$PROXIMITY_RADIUS")
-        googlePlacesUrl.append("&type=$nearbyPlace")
-        googlePlacesUrl.append("&sensor=true")
-        googlePlacesUrl.append("&key=" + "AIzaSyATuUiZUkEc_UgHuqsBJa1oqaODI-3mLs0")
-        Log.d("getUrl", googlePlacesUrl.toString())
-        return googlePlacesUrl.toString()
     }
 
     /**
@@ -249,14 +288,15 @@ class MapFragment : Fragment(), OnMapReadyCallback {
                 mLastKnownLocation = null
                 getLocationPermission()
             }
-        } catch (exception: SecurityException) {
-            Log.e("Exception: %s", exception.message)
+        } catch (e: SecurityException) {
+            Log.e("Exception: %s", e.message)
         }
 
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
+        // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_map, container, false)
     }
 

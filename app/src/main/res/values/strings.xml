@@ -18,4 +18,6 @@
     <string name="goto_photo_button_description">Goto Photo</string>
 
     <string name="google_directions_api_key">AIzaSyCxPHc3awJKMgrJCqYm5oOgNIVppLA_CBE</string>
+
+    <string name="plot_the_route">Построить маршрут</string>
 </resources>

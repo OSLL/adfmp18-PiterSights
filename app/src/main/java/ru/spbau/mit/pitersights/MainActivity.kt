@@ -8,7 +8,6 @@ import android.util.Log
 
 import kotlinx.android.synthetic.main.activity_main.*
 import ru.spbau.mit.pitersights.core.Sight
-import java.io.Serializable
 
 class MainActivity : AppCompatActivity()
         , LoadingFragment.OnLoadingFragmentInteractionListener
@@ -100,9 +99,11 @@ class MainActivity : AppCompatActivity()
                 }
         )
         historyFragment.sights = sights
+        mapFragment.sights = sights
 
         setFragment(loadingFragment, R.id.container, false)
         setFragment(menuFragment, R.id.menu_buttons_container, false)
-        gotoHistory()
+//        gotoHistory()
+        gotoMap()
     }
 }
