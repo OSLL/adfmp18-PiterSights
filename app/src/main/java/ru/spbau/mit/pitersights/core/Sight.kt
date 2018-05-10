@@ -2,13 +2,14 @@ package ru.spbau.mit.pitersights.core
 
 import android.os.Parcel
 import android.os.Parcelable
+import com.google.android.gms.maps.model.LatLng
 
 // TODO нам нужно откуда то извлекать позицию и описание, я пока не знаю откуда
 // TODO geoPosition structure.
 data class Sight(val name: String,
             val description: List<String> = emptyList<String>(), // три элемента
             val imageResource: Int,
-            val geoPosition: String = "") : Parcelable {
+            val geoPosition: LatLng = LatLng(0.0, 0.0)) : Parcelable {
     val id = IdSetter.create(); get
 
     var _photo: String = ""
@@ -22,7 +23,7 @@ data class Sight(val name: String,
             parcel.readString(),
             parcel.createStringArrayList(),
             parcel.readInt(),
-            parcel.readString()) {
+            LatLng(parcel.readDouble(), parcel.readDouble())) {
         _photo = parcel.readString()
     }
 
@@ -43,7 +44,8 @@ data class Sight(val name: String,
         parcel.writeString(name)
         parcel.writeStringList(description)
         parcel.writeInt(imageResource)
-        parcel.writeString(geoPosition)
+        parcel.writeDouble(geoPosition.latitude)
+        parcel.writeDouble(geoPosition.longitude)
         parcel.writeString(_photo)
     }
 
