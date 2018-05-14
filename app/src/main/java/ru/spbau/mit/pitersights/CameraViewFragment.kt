@@ -2,6 +2,7 @@ package ru.spbau.mit.pitersights
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
 import android.os.Bundle
 import android.os.Environment
 import android.os.Handler
@@ -21,6 +22,8 @@ import android.os.HandlerThread
 import android.support.v4.content.ContextCompat
 import android.os.Build
 import android.support.annotation.NonNull
+import android.view.TextureView
+import com.google.android.cameraview.R.layout.texture_view
 import kotlinx.android.synthetic.main.fragment_camera.*
 
 class CameraViewFragment: Fragment(), ActivityCompat.OnRequestPermissionsResultCallback {
@@ -40,31 +43,39 @@ class CameraViewFragment: Fragment(), ActivityCompat.OnRequestPermissionsResultC
         }
 
         override fun onPictureTaken(cameraView: CameraView, data: ByteArray) {
-            // предпросмотр, все дела
-            Log.d(this.toString(), "onPictureTaken " + data.size)
-            Toast.makeText(cameraView.context, R.string.picture_taken, Toast.LENGTH_SHORT)
-                    .show()
-            getBackgroundHandler().post(Runnable {
-                val file = File(requireContext().getExternalFilesDir(Environment.DIRECTORY_PICTURES),
-                        "picture.jpg")
-                var os: OutputStream? = null
-                try {
-                    os = FileOutputStream(file)
-                    os!!.write(data)
-                    os!!.close()
-                } catch (e: IOException) {
-                    Log.w(this.toString(), "Cannot write to $file", e)
-                } finally {
-                    if (os != null) {
-                        try {
-                            os!!.close()
-                        } catch (e: IOException) {
-                        }
-
-                    }
-                }
-            })
+            val textureView = texture_view as TextureView
+            val bitmap = textureView.getBitmap()
+            callPreviewDialog(bitmap, data)
         }
+    }
+
+    private fun callPreviewDialog(bitmap: Bitmap, data: ByteArray) {
+        PreviewDialogFragment(bitmap, data)
+                .show(this.requireFragmentManager(), "preview")
+    }
+
+    fun savePhoto(data: ByteArray) {
+        Log.d(this.toString(), "onPictureTaken " + data.size)
+        getBackgroundHandler().post(Runnable {
+            val file = File(requireContext().getExternalFilesDir(Environment.DIRECTORY_PICTURES),
+                    "picture.jpg")
+            var os: OutputStream? = null
+            try {
+                os = FileOutputStream(file)
+                os!!.write(data)
+                os!!.close()
+            } catch (e: IOException) {
+                Log.w(this.toString(), "Cannot write to $file", e)
+            } finally {
+                if (os != null) {
+                    try {
+                        os!!.close()
+                    } catch (e: IOException) {
+                    }
+
+                }
+            }
+        })
     }
 
     private fun getBackgroundHandler(): Handler {
