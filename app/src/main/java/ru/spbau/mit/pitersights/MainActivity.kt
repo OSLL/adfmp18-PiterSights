@@ -7,6 +7,7 @@ import android.support.v7.app.AppCompatActivity
 import android.util.Log
 
 import kotlinx.android.synthetic.main.activity_main.*
+import ru.spbau.mit.pitersights.core.Player
 import ru.spbau.mit.pitersights.core.Sight
 
 class MainActivity : AppCompatActivity()
@@ -98,8 +99,10 @@ class MainActivity : AppCompatActivity()
                     )
                 }
         )
+        val player = Player(applicationContext)
         historyFragment.sights = sights
         mapFragment.sights = sights
+        mapFragment.player = player
 
         setFragment(loadingFragment, R.id.container, false)
         setFragment(menuFragment, R.id.menu_buttons_container, false)
