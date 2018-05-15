@@ -22,6 +22,7 @@ import android.os.HandlerThread
 import android.support.v4.content.ContextCompat
 import android.os.Build
 import android.support.annotation.NonNull
+import android.support.v4.app.FragmentManager
 import android.view.TextureView
 import com.google.android.cameraview.R.layout.texture_view
 import kotlinx.android.synthetic.main.fragment_camera.*
@@ -51,7 +52,7 @@ class CameraViewFragment: Fragment(), ActivityCompat.OnRequestPermissionsResultC
 
     private fun callPreviewDialog(bitmap: Bitmap, data: ByteArray) {
         PreviewDialogFragment(bitmap, data)
-                .show(this.requireFragmentManager(), "preview")
+                .show(this.requireFragmentManager() as FragmentManager, "preview")
     }
 
     fun savePhoto(data: ByteArray) {
