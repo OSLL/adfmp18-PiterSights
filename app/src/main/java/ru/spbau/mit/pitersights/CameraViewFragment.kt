@@ -22,8 +22,8 @@ import android.os.HandlerThread
 import android.support.v4.content.ContextCompat
 import android.os.Build
 import android.support.annotation.NonNull
-import android.support.v4.app.FragmentManager
 import android.view.TextureView
+import android.widget.TextView
 import com.google.android.cameraview.R.layout.texture_view
 import kotlinx.android.synthetic.main.fragment_camera.*
 
@@ -32,6 +32,9 @@ class CameraViewFragment: Fragment(), ActivityCompat.OnRequestPermissionsResultC
     private val REQUEST_CAMERA_PERMISSION = 1
 
     private var mBackgroundHandler: Handler? = null
+
+    private var leftSights = emptyArray<TextView>()
+    private var rightSights = emptyArray<TextView>()
 
     private val mCallback = object : CameraView.Callback() {
 
@@ -50,9 +53,21 @@ class CameraViewFragment: Fragment(), ActivityCompat.OnRequestPermissionsResultC
         }
     }
 
+    private val mOnClickListener = View.OnClickListener { v ->
+        when (v.id) {
+            R.id.camera -> if (mCameraView != null) {
+                val isGeographerSaidYes = true // тут должны быть данные о достопримечательности, на которую мы смотрим
+                if (isGeographerSaidYes) {
+                    // открыть окно с описанием достопримечательности
+                    // думаю сюда можно сунуть диалоговое
+                }
+            }
+        }
+    }
+
     private fun callPreviewDialog(bitmap: Bitmap, data: ByteArray) {
         PreviewDialogFragment(bitmap, data)
-                .show(this.requireFragmentManager() as FragmentManager, "preview")
+                .show(this.requireFragmentManager(), "preview")
     }
 
     fun savePhoto(data: ByteArray) {
@@ -96,6 +111,16 @@ class CameraViewFragment: Fragment(), ActivityCompat.OnRequestPermissionsResultC
         super.onViewCreated(view, savedInstanceState)
         mCameraView = camera as CameraView
         mCameraView!!.addCallback(mCallback)
+
+        // тут нужно получить от географа ближайшие достопримечательности и внести их в
+        // leftSights и rightSights
+        leftSights.map { sight -> leftNeighbors.addView(sight) }
+        rightSights.map { sight -> rightNeighbors.addView(sight) }
+
+        // добавить обработчик на клики по rightSights и leftSights
+
+        mCameraView!!.setOnClickListener(mOnClickListener)
+
     }
 
     override fun onResume() {
@@ -151,6 +176,12 @@ class CameraViewFragment: Fragment(), ActivityCompat.OnRequestPermissionsResultC
 
     fun takePicture() {
         Log.i("CameraViewFragment", "TakingPicture")
-        mCameraView!!.takePicture()
+        var geographerSaidYes = true // проверка геолокации и компаса должна быть здесь
+        if (geographerSaidYes) {
+            mCameraView!!.takePicture() // имя фото тоже надо передавать
+        } else {
+            Toast.makeText(this.requireContext(), R.string.take_photo_not_allowed,
+                    Toast.LENGTH_SHORT).show()
+        }
     }
 }
