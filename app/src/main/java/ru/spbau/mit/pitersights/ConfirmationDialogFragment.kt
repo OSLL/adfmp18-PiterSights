@@ -22,13 +22,12 @@ class ConfirmationDialogFragment(): DialogFragment() {
                 permissions: Array<String>,
                 requestCode: Int,
                 @StringRes notGrantedMessage: Int) : this() {
-        val fragment = ConfirmationDialogFragment()
         val args = Bundle()
         args.putInt(ARG_MESSAGE, message)
         args.putStringArray(ARG_PERMISSIONS, permissions)
         args.putInt(ARG_REQUEST_CODE, requestCode)
         args.putInt(ARG_NOT_GRANTED_MESSAGE, notGrantedMessage)
-        fragment.arguments = args
+        arguments = args
     }
 
     @NonNull
@@ -40,7 +39,7 @@ class ConfirmationDialogFragment(): DialogFragment() {
                         DialogInterface.OnClickListener { dialog, which ->
                             val permissions = args.getStringArray(ARG_PERMISSIONS)
                                     ?: throw IllegalArgumentException()
-                            activity?.let {
+                            activity!!.let {
                                 ActivityCompat.requestPermissions(it,
                                         permissions, args.getInt(ARG_REQUEST_CODE))
                             }

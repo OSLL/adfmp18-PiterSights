@@ -13,36 +13,37 @@ import android.widget.Toast
 
 
 class PreviewDialogFragment(): DialogFragment() {
+    private var cameraViewFragment: CameraViewFragment? = null
     private val ARG_BITMAP = "bitmap"
     private val ARG_DATA = "bytearray"
     private val ARG_CANCEL = "cancel_message"
 
     @SuppressLint("ValidFragment")
-    constructor(image: Bitmap, data: ByteArray) : this() {
-        val fragment = PreviewDialogFragment()
-        val args = Bundle()
+    constructor(image: Bitmap, data: ByteArray, cameraViewFragment: CameraViewFragment) : this() {
+        this.cameraViewFragment = cameraViewFragment
+        arguments = Bundle()
+        val args = arguments!!
         args.putParcelable(ARG_BITMAP, image)
         args.putByteArray(ARG_DATA, data)
         args.putString(ARG_CANCEL, "Photo is rejected")
-        fragment.arguments = args
     }
 
     @NonNull
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        val args = arguments
-        val bitmapimage = args!!.getParcelable<Bitmap>(ARG_BITMAP)
+        val args = arguments!!
+        val bitmapImage = args.getParcelable<Bitmap>(ARG_BITMAP)
 
         val imageView = ImageView(context)
-        imageView.setImageBitmap(bitmapimage)
+        imageView.setImageBitmap(bitmapImage)
 
         return AlertDialog.Builder(activity)
                 .setView(imageView)
-                .setPositiveButton(android.R.string.ok, DialogInterface.OnClickListener { dialog, which ->
-                    (parentFragment as CameraViewFragment).savePhoto(args.getByteArray(ARG_DATA))
+                .setPositiveButton(android.R.string.ok, { dialog, which ->
+                    cameraViewFragment!!.savePhoto(args.getByteArray(ARG_DATA))
                     Toast.makeText(activity, R.string.picture_taken, Toast.LENGTH_SHORT)
                             .show()
                 })
-                .setNegativeButton(android.R.string.cancel, DialogInterface.OnClickListener { dialog, which ->
+                .setNegativeButton(android.R.string.cancel, { dialog, which ->
                     Toast.makeText(activity, args.getString(ARG_CANCEL), Toast.LENGTH_SHORT).show()
                 })
                 .create()
