@@ -18,10 +18,8 @@
     <string name="take_photo_button_description">Take Photo</string>
     <string name="goto_photo_button_description">Goto Photo</string>
 
-
     <string name="google_directions_api_key">AIzaSyCxPHc3awJKMgrJCqYm5oOgNIVppLA_CBE</string>
-
-    <string name="plot_the_route">Построить маршрут</string>
+    <string name="plot_the_route">Plot the route</string>
 
     <string name="picture_taken">Picture taken</string>
     <string name="camera_permission_confirmation">This app demonstrates the usage of CameraView. In order to do that, it needs permission to access camera.</string>
