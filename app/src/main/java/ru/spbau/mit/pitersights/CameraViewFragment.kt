@@ -1,16 +1,15 @@
 package ru.spbau.mit.pitersights
 
 import android.Manifest
+import android.content.DialogInterface
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
+import android.graphics.Color
 import android.os.Bundle
 import android.os.Environment
 import android.os.Handler
 import android.support.v4.app.ActivityCompat
 import android.support.v4.app.Fragment
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
 import com.google.android.cameraview.CameraView;
 import android.util.Log
 import android.widget.Toast
@@ -22,11 +21,10 @@ import android.os.HandlerThread
 import android.support.v4.content.ContextCompat
 import android.os.Build
 import android.support.annotation.NonNull
-import android.view.TextureView
+import android.support.v7.app.AlertDialog
+import android.view.*
 import android.widget.TextView
-import com.google.android.cameraview.R.layout.texture_view
 import kotlinx.android.synthetic.main.fragment_camera.*
-import kotlinx.android.synthetic.main.fragment_loading.view.*
 
 class CameraViewFragment: Fragment(), ActivityCompat.OnRequestPermissionsResultCallback {
     private var mCameraView: CameraView? = null
@@ -50,8 +48,6 @@ class CameraViewFragment: Fragment(), ActivityCompat.OnRequestPermissionsResultC
         override fun onPictureTaken(cameraView: CameraView, data: ByteArray) {
             // TODO neater fix.
             val textureView = cameraView.getChildAt(0) as TextureView
-//            val textureView = cameraView.findViewById<TextureView>(R.layout.texture_view)
-//            val textureView = activity!!.findViewById(R.layout.texture_view) as TextureView
             val bitmap = textureView.getBitmap()
             callPreviewDialog(bitmap, data)
         }
@@ -62,11 +58,23 @@ class CameraViewFragment: Fragment(), ActivityCompat.OnRequestPermissionsResultC
             R.id.camera -> if (mCameraView != null) {
                 val isGeographerSaidYes = true // тут должны быть данные о достопримечательности, на которую мы смотрим
                 if (isGeographerSaidYes) {
-                    // открыть окно с описанием достопримечательности
-                    // думаю сюда можно сунуть диалоговое
+                    showDescription("Text description of sight must be here!")
                 }
             }
         }
+    }
+
+    private fun showDescription(text: String) {
+        val alert =  AlertDialog.Builder(requireContext()).setMessage(text).setNegativeButton(
+                R.string.textDialogClose, DialogInterface.OnClickListener() { dialog, which ->
+                    dialog.dismiss();
+                }).show()
+
+        val textView = alert.findViewById<TextView>(android.R.id.message)
+        textView?.setTextColor(Color.WHITE);
+        textView?.setTextSize(19F);
+        textView?.setGravity(Gravity.CENTER);
+        alert.window.setBackgroundDrawableResource(android.R.color.transparent)
     }
 
     private fun callPreviewDialog(bitmap: Bitmap, data: ByteArray) {

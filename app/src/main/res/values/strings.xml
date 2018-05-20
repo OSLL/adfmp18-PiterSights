@@ -22,4 +22,5 @@
     <string name="camera_permission_confirmation">This app demonstrates the usage of CameraView. In order to do that, it needs permission to access camera.</string>
     <string name="camera_permission_not_granted">Camera app cannot do anything without camera permission.</string>
     <string name="take_photo_not_allowed">No one sight in camera view</string>
+    <string name="textDialogClose">Close</string>
 </resources>
