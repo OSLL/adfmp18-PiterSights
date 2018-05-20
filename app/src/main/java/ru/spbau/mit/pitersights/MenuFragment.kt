@@ -95,6 +95,9 @@ class MenuFragment : Fragment() {
                 ChangeModeButton.Mode.INVALID -> throw RuntimeException("Invalid changeModeButton state.")
             }
         })
+        takePhotoButton.setOnClickListener({
+            listener!!.onTakePhotoButtonClicked()
+        })
     }
 
     override fun onAttach(context: Context) {
@@ -111,19 +114,18 @@ class MenuFragment : Fragment() {
         listener = null
     }
 
-    fun preparePhotoMode() {
+    private fun preparePhotoMode() {
         changeModeButton.setMapMode()
         takePhotoButton.visibility = VISIBLE
     }
 
-    fun prepareNonPhotoMode() {
+    private fun prepareNonPhotoMode() {
         changeModeButton.setPhotoMode()
         takePhotoButton.visibility = GONE
     }
 
     interface OnMenuFragmentInteractionListener {
-        fun onMenuFragmentInteraction(uri: Uri) {
-        }
+        fun onTakePhotoButtonClicked();
 
         fun gotoPhoto() {
             Log.d("menu_fragment", "Going to Photo")
