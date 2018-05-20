@@ -2,20 +2,14 @@ package ru.spbau.mit.pitersights
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.content.pm.PackageManager
-import android.location.Location
-import android.location.LocationListener
 import android.net.Uri
 import android.os.Bundle
-import android.support.v4.app.ActivityCompat
 import android.support.v4.app.Fragment
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.places.GeoDataClient
 import com.google.android.gms.location.places.PlaceDetectionClient
 import com.google.android.gms.location.places.Places
@@ -28,42 +22,40 @@ import com.google.maps.DirectionsApi
 import com.google.maps.GeoApiContext
 import com.google.maps.android.PolyUtil
 import com.google.maps.model.TravelMode
+import ru.spbau.mit.pitersights.core.Player
 import ru.spbau.mit.pitersights.core.Sight
 import java.util.concurrent.TimeUnit
 
 class MapFragment : Fragment(), OnMapReadyCallback {
     var sights: List<Sight> = emptyList()
+    var player: Player? = null
+
     private lateinit var mMap: GoogleMap
+    public var isReady = false
     private lateinit var mCameraPosition: CameraPosition
+    private var playerMarker: Marker? = null
 
     private var mGeoDataClient: GeoDataClient? = null
     private var mPlaceDetectionClient: PlaceDetectionClient? = null
     private var mGeoApiContext: GeoApiContext? = null
-    private var mFusedLocationProviderClient: FusedLocationProviderClient? = null
 
-    private val mDefaultLocation = LatLng(-33.8523341, 151.2106085)
     private val DEFAULT_ZOOM = 15
-    private val PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1
-    private var mLocationPermissionGranted: Boolean = false
 
-    private var mLastKnownLocation: Location? = null
+
     private val PROXIMITY_RADIUS = 10000
     private var mCurrentRoute: Polyline? = null
 
     private val KEY_CAMERA_POSITION = "camera_position"
-    private val KEY_LOCATION = "location"
     private var mPlaceLatLngs: Array<LatLng?>? = null
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         if (savedInstanceState != null) {
-            mLastKnownLocation = savedInstanceState.getParcelable(KEY_LOCATION)
             mCameraPosition = savedInstanceState.getParcelable(KEY_CAMERA_POSITION)
         }
         mGeoDataClient = context?.let { Places.getGeoDataClient(it) }
         mPlaceDetectionClient = context?.let { Places.getPlaceDetectionClient(it) }
-        mFusedLocationProviderClient = context?.let { LocationServices.getFusedLocationProviderClient(it) }
         mGeoApiContext = GeoApiContext()
                 .setQueryRateLimit(3)
                 .setApiKey(getString(R.string.google_directions_api_key))
@@ -75,13 +67,13 @@ class MapFragment : Fragment(), OnMapReadyCallback {
 
     override fun onSaveInstanceState(outState: Bundle) {
         outState.putParcelable(KEY_CAMERA_POSITION, mMap.cameraPosition)
-        outState.putParcelable(KEY_LOCATION, mLastKnownLocation)
         super.onSaveInstanceState(outState)
     }
 
 
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
+        isReady = true
         mMap.uiSettings.isMapToolbarEnabled = false
 
         mMap.setInfoWindowAdapter(object : GoogleMap.InfoWindowAdapter {
@@ -100,8 +92,11 @@ class MapFragment : Fragment(), OnMapReadyCallback {
                 snippet.text = marker.snippet
 
                 val dest = marker.position
-                val selfLocation = mLastKnownLocation
-                if (selfLocation != null && dest != null) {
+                var selfLocation = player?.geoLocation
+                while (selfLocation == null) {
+                    selfLocation = player?.geoLocation
+                }
+                if (dest != null && selfLocation != null) {
                     val result = DirectionsApi.newRequest(mGeoApiContext)
                             .mode(TravelMode.WALKING)
                             .origin(com.google.maps.model.LatLng(selfLocation.latitude, selfLocation.longitude))
@@ -122,37 +117,32 @@ class MapFragment : Fragment(), OnMapReadyCallback {
             }
         })
 
-        getLocationPermission()
+        updatePlayerLocation()
         updateLocationUI()
-        getDeviceLocation()
     }
 
-    private fun getDeviceLocation() {
+    public fun updatePlayerLocation() {
         try {
-            if (mLocationPermissionGranted) {
-                val locationResult = mFusedLocationProviderClient?.lastLocation
-                locationResult!!.addOnCompleteListener({ task ->
-                    if (task.isSuccessful) {
-                        // Set the map's camera position to the current location of the device.
-                        mLastKnownLocation = task.result
-                        Log.i(tag, "current location: $mLastKnownLocation")
-                        val location = mLastKnownLocation
-                        if (location != null) {
-                            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
-                                    LatLng(location.latitude,
-                                            location.longitude), DEFAULT_ZOOM.toFloat()))
-
-                         showCurrentPlace()
-                        }
-                    } else {
-                        Log.d(tag, "Current location is null. Using defaults.")
-                        Log.e(tag, "Exception: %s", task.exception)
-                        mMap.moveCamera(CameraUpdateFactory
-                                .newLatLngZoom(mDefaultLocation, DEFAULT_ZOOM.toFloat()))
-                        mMap.uiSettings.isMyLocationButtonEnabled = false
-                    }
-                })
+            var location = player?.geoLocation
+            while (location == null) {
+                location = player?.geoLocation
             }
+            if (playerMarker != null) {
+                playerMarker!!.remove()
+            }
+            playerMarker = mMap.addMarker(
+                    MarkerOptions()
+                            .position(LatLng(location.latitude, location.longitude))
+                            .icon(BitmapDescriptorFactory.fromResource(R.drawable.man))
+                            .snippet("Вы здесь")
+                            .rotation(location.bearing)
+                            .flat(true)
+            )
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
+                    LatLng(location.latitude,
+                            location.longitude), DEFAULT_ZOOM.toFloat()))
+
+            showCurrentPlace()
         } catch (e: SecurityException) {
             Log.e("Exception: %s", e.message)
         }
@@ -160,46 +150,22 @@ class MapFragment : Fragment(), OnMapReadyCallback {
     }
 
 
-    private fun getLocationPermission() {
-        if (context?.let {
-                    ActivityCompat.checkSelfPermission(it,
-                            android.Manifest.permission.ACCESS_FINE_LOCATION)
-                } == PackageManager.PERMISSION_GRANTED) {
-            mLocationPermissionGranted = true
-        } else {
-            requestPermissions(arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION),
-                    PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION)
-        }
-    }
-
-
-    override fun onRequestPermissionsResult(requestCode: Int,
-                                            permissions: Array<String>,
-                                            grantResults: IntArray) {
-        mLocationPermissionGranted = false
-        when (requestCode) {
-            PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION -> {
-                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    mLocationPermissionGranted = true
-                }
-            }
-        }
-        updateLocationUI()
-    }
-
     @SuppressLint("MissingPermission")
     private fun showCurrentPlace() {
-        if (mLocationPermissionGranted) {
-            val currentLocation = mLastKnownLocation
+//        if (mLocationPermissionGranted) {
+            var currentLocation = player!!.geoLocation
+            while (currentLocation == null) {
+                currentLocation = player!!.geoLocation
+            }
             val url = getUrl(
                     currentLocation!!.latitude,
                     currentLocation.longitude,
                     "point_of_interest")
             val getNearbyPlacesData = NearbyPlacesGetter()
             getNearbyPlacesData.execute(mMap, url)
-        } else {
-            getLocationPermission()
-        }
+//        } else {
+//            getLocationPermission()
+//        }
     }
 
     private fun getUrl(latitude: Double, longitude: Double, nearbyPlace: String): String {
@@ -240,15 +206,14 @@ class MapFragment : Fragment(), OnMapReadyCallback {
      */
     private fun updateLocationUI() {
         try {
-            if (mLocationPermissionGranted) {
+//            if (mLocationPermissionGranted) {
                 mMap.isMyLocationEnabled = true
                 mMap.uiSettings.isMyLocationButtonEnabled = true
-            } else {
-                mMap.isMyLocationEnabled = false
-                mMap.uiSettings.isMyLocationButtonEnabled = false
-                mLastKnownLocation = null
-                getLocationPermission()
-            }
+//            } else {
+//                mMap.isMyLocationEnabled = false
+//                mMap.uiSettings.isMyLocationButtonEnabled = false
+//                getLocationPermission()
+//            }
         } catch (exception: SecurityException) {
             Log.e("Exception: %s", exception.message)
         }

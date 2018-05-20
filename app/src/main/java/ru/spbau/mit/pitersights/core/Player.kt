@@ -3,52 +3,53 @@ package ru.spbau.mit.pitersights.core
 import android.content.Context
 import android.content.pm.PackageManager
 import android.location.Location
+import android.location.LocationListener
+import android.os.Bundle
 import android.support.v4.app.ActivityCompat
 import android.util.Log
-import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationServices
-import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.tasks.Task
+import android.location.LocationManager
+
+
+
+
 
 class Player(private val context: Context?) {
-    internal val defaultLatLng = LatLng(-33.8523341, 151.2106085) // Sidney
-
-    private var locationResult: Task<Location>? = null
-
     internal var geoLocation: Location? = null
-//        get() {
-//            return if (field != null) {
-//                field
-//            } else {
-//                val defaultLocation = Location("default location")
-//                defaultLocation.latitude = defaultLatLng.latitude
-//                defaultLocation.longitude = defaultLatLng.longitude
-//                defaultLocation.bearing = 10.0f
-//                defaultLocation
-//            }
-//        }
 
     private val PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1
     private var mLocationPermissionGranted: Boolean = false
-    private var mFusedLocationProviderClient: FusedLocationProviderClient? = null
 
     init {
-        mFusedLocationProviderClient = context?.let { LocationServices.getFusedLocationProviderClient(it) }
         getLocationPermission()
         getPlayerLocation()
     }
 
-
     private fun getPlayerLocation() {
         try {
-            if (mLocationPermissionGranted) {
-                locationResult = mFusedLocationProviderClient?.lastLocation
-                locationResult!!.addOnCompleteListener({ task ->
-                    if (task.isSuccessful) {
-                        geoLocation = task.result
-                    }
-                })
+            val locationContext = Context.LOCATION_SERVICE
+            val locationManager = context!!.getSystemService(locationContext) as LocationManager
+            val providers = locationManager.getProviders(true)
+            for (provider in providers) {
+                locationManager.requestLocationUpdates(provider, 1000L, 0.0f,
+                        object : LocationListener {
+                            override fun onLocationChanged(location: Location) {
+                                geoLocation = location
+                            }
+
+                            override fun onProviderDisabled(provider: String) {}
+
+                            override fun onProviderEnabled(provider: String) {}
+
+                            override fun onStatusChanged(provider: String, status: Int,
+                                                extras: Bundle) {
+                            }
+                        })
+                val location = locationManager.getLastKnownLocation(provider)
+                if (location != null) {
+                    geoLocation = location
+                }
             }
+
         } catch (e: SecurityException) {
             Log.e("Exception: %s", e.message)
         }
@@ -78,6 +79,5 @@ class Player(private val context: Context?) {
                 }
             }
         }
-//        updateLocationUI()
     }
 }
