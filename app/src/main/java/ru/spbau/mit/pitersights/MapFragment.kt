@@ -26,11 +26,11 @@ import ru.spbau.mit.pitersights.core.Player
 import ru.spbau.mit.pitersights.core.Sight
 import java.util.concurrent.TimeUnit
 
-class MapFragment : Fragment(), OnMapReadyCallback {
+class MapFragment : Fragment(), OnMapReadyCallback, Player.PlayerLocationListener {
     var sights: List<Sight> = emptyList()
     var player: Player? = null
 
-    private lateinit var mMap: GoogleMap
+    private var mMap: GoogleMap? = null
     public var isReady = false
     private lateinit var mCameraPosition: CameraPosition
     private var playerMarker: Marker? = null
@@ -40,7 +40,6 @@ class MapFragment : Fragment(), OnMapReadyCallback {
     private var mGeoApiContext: GeoApiContext? = null
 
     private val DEFAULT_ZOOM = 15
-
 
     private val PROXIMITY_RADIUS = 10000
     private var mCurrentRoute: Polyline? = null
@@ -66,54 +65,57 @@ class MapFragment : Fragment(), OnMapReadyCallback {
 
 
     override fun onSaveInstanceState(outState: Bundle) {
-        outState.putParcelable(KEY_CAMERA_POSITION, mMap.cameraPosition)
+        outState.putParcelable(KEY_CAMERA_POSITION, mMap!!.cameraPosition)
         super.onSaveInstanceState(outState)
     }
 
 
+    @SuppressLint("MissingPermission")
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
         isReady = true
-        mMap.uiSettings.isMapToolbarEnabled = false
+        mMap!!.uiSettings.isMapToolbarEnabled = false
 
-        mMap.setInfoWindowAdapter(object : GoogleMap.InfoWindowAdapter {
+        mMap!!.setInfoWindowAdapter(object : GoogleMap.InfoWindowAdapter {
 
             override fun getInfoWindow(marker: Marker): View? {
                 return null
             }
 
             override fun getInfoContents(marker: Marker): View {
-                val infoWindow = layoutInflater.inflate(R.layout.map_sight_description, null)
+                synchronized(this) {
+                    val infoWindow = layoutInflater.inflate(R.layout.map_sight_description, null)
 
-                val title = infoWindow.findViewById(R.id.tv_title) as TextView
-                title.text = marker.title
+                    val title = infoWindow.findViewById(R.id.tv_title) as TextView
+                    title.text = marker.title
 
-                val snippet = infoWindow.findViewById(R.id.tv_subtitle) as TextView
-                snippet.text = marker.snippet
+                    val snippet = infoWindow.findViewById(R.id.tv_subtitle) as TextView
+                    snippet.text = marker.snippet
 
-                val dest = marker.position
-                var selfLocation = player?.geoLocation
-                while (selfLocation == null) {
-                    selfLocation = player?.geoLocation
+                    val dest = marker.position
+                    var selfLocation = player?.geoLocation
+                    while (selfLocation == null) {
+                        selfLocation = player?.geoLocation
+                    }
+                    if (dest != null) {
+                        val result = DirectionsApi.newRequest(mGeoApiContext)
+                                .mode(TravelMode.WALKING)
+                                .origin(com.google.maps.model.LatLng(selfLocation.latitude, selfLocation.longitude))
+                                .destination(com.google.maps.model.LatLng(dest.latitude, dest.longitude))
+                                .await()
+
+                        val decodedPath = PolyUtil.decode(
+                                result.routes[0].overviewPolyline.encodedPath
+                        )
+                        mCurrentRoute?.remove()
+                        mCurrentRoute = mMap!!.addPolyline(PolylineOptions()
+                                .width(8.0f)
+                                .color(resources.getColor(R.color.routeColor, null))
+                                .addAll(decodedPath))
+                    }
+
+                    return infoWindow
                 }
-                if (dest != null && selfLocation != null) {
-                    val result = DirectionsApi.newRequest(mGeoApiContext)
-                            .mode(TravelMode.WALKING)
-                            .origin(com.google.maps.model.LatLng(selfLocation.latitude, selfLocation.longitude))
-                            .destination(com.google.maps.model.LatLng(dest.latitude, dest.longitude))
-                            .await()
-
-                    val decodedPath = PolyUtil.decode(
-                            result.routes[0].overviewPolyline.encodedPath
-                    )
-                    mCurrentRoute?.remove()
-                    mCurrentRoute = mMap.addPolyline(PolylineOptions()
-                            .width(8.0f)
-                            .color(resources.getColor(R.color.routeColor, null))
-                            .addAll(decodedPath))
-                }
-
-                return infoWindow
             }
         })
 
@@ -121,32 +123,41 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         updateLocationUI()
     }
 
-    public fun updatePlayerLocation() {
-        try {
-            var location = player?.geoLocation
-            while (location == null) {
-                location = player?.geoLocation
-            }
-            if (playerMarker != null) {
-                playerMarker!!.remove()
-            }
-            playerMarker = mMap.addMarker(
-                    MarkerOptions()
-                            .position(LatLng(location.latitude, location.longitude))
-                            .icon(BitmapDescriptorFactory.fromResource(R.drawable.man))
-                            .snippet("Вы здесь")
-                            .rotation(location.bearing)
-                            .flat(true)
-            )
-            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
-                    LatLng(location.latitude,
-                            location.longitude), DEFAULT_ZOOM.toFloat()))
-
-            showCurrentPlace()
-        } catch (e: SecurityException) {
-            Log.e("Exception: %s", e.message)
+    override fun onPlayerLocationChanged() {
+        if (mMap != null) {
+            updatePlayerLocation()
         }
+    }
 
+    private fun updatePlayerLocation() {
+        synchronized(this) {
+            try {
+                var location = player?.geoLocation
+                while (location == null) {
+                    location = player?.geoLocation
+                }
+                if (playerMarker == null) {
+                    playerMarker = mMap!!.addMarker(
+                            MarkerOptions()
+                                    .position(LatLng(location.latitude, location.longitude))
+                                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.man))
+                                    .snippet("Вы здесь")
+                                    .rotation(location.bearing)
+                                    .flat(true)
+                    )
+                    mMap!!.moveCamera(CameraUpdateFactory.newLatLngZoom(
+                        LatLng(location.latitude,
+                                location.longitude), DEFAULT_ZOOM.toFloat()))
+                } else {
+                    playerMarker!!.position = LatLng(location.latitude, location.longitude)
+                    playerMarker!!.rotation = location.bearing
+                }
+
+//            showCurrentPlace()
+            } catch (e: SecurityException) {
+                Log.e("Exception: %s", e.message)
+            }
+        }
     }
 
 
@@ -189,7 +200,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         val currentPlaces = mPlaceLatLngs
         if (currentPlaces != null) {
             for (likelyPlace in currentPlaces) {
-                mMap.addMarker(likelyPlace?.let {
+                mMap!!.addMarker(likelyPlace?.let {
                     MarkerOptions()
                             .title("some place")
                             .position(it)
@@ -207,8 +218,8 @@ class MapFragment : Fragment(), OnMapReadyCallback {
     private fun updateLocationUI() {
         try {
 //            if (mLocationPermissionGranted) {
-                mMap.isMyLocationEnabled = true
-                mMap.uiSettings.isMyLocationButtonEnabled = true
+                mMap!!.isMyLocationEnabled = true
+                mMap!!.uiSettings.isMyLocationButtonEnabled = true
 //            } else {
 //                mMap.isMyLocationEnabled = false
 //                mMap.uiSettings.isMyLocationButtonEnabled = false
@@ -233,10 +244,15 @@ class MapFragment : Fragment(), OnMapReadyCallback {
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
-        if (context is OnFragmentInteractionListener) {
-        } else {
+        if (context !is OnFragmentInteractionListener) {
             throw RuntimeException(context.toString() + " must implement OnLoadingFragmentInteractionListener")
         }
+        player!!.registerLocationListener(this)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        player!!.unregisterLocationListener(this)
     }
 
     interface OnFragmentInteractionListener {
