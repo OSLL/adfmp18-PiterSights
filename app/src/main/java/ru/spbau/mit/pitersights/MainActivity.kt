@@ -102,7 +102,7 @@ class MainActivity : AppCompatActivity()
                     )
                 }
         )
-        val player = Player(applicationContext)
+        val player = Player(applicationContext, this)
         historyFragment.sights = sights
         mapFragment.sights = sights
         mapFragment.player = player

@@ -1,5 +1,6 @@
 package ru.spbau.mit.pitersights.core
 
+import android.app.Activity
 import android.content.Context
 import android.content.pm.PackageManager
 import android.hardware.Sensor
@@ -14,11 +15,12 @@ import android.util.Log
 import android.location.LocationManager
 import android.location.LocationProvider
 import android.net.Uri
+import android.support.v4.app.ActivityCompat.requestPermissions
 import java.util.*
 import java.util.concurrent.TimeUnit
 
 
-class Player(private val context: Context?) : LocationListener, SensorEventListener {
+class Player(private val context: Context?, private val activity: Activity) : LocationListener, SensorEventListener {
     internal var geoLocation: Location? = null
     internal var accelerometer: Sensor? = null
     internal var magnetometer: Sensor? = null
@@ -145,8 +147,8 @@ class Player(private val context: Context?) : LocationListener, SensorEventListe
                 } == PackageManager.PERMISSION_GRANTED) {
             mLocationPermissionGranted = true
         } else {
-//            requestPermissions(arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION),
-//                    PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION)
+            activity.requestPermissions(arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION),
+                    PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION)
         }
     }
 
