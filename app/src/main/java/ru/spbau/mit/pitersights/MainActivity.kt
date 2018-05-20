@@ -16,6 +16,7 @@ class MainActivity : AppCompatActivity()
         , MapFragment.OnFragmentInteractionListener
         , HistoryFragment.OnHistoryFragmentInteractionListener
         , SightFragment.OnSightFragmentInteractionListener
+//        , CameraViewFragment.OnCameraFragmentInteractionListener
 {
     private val LOG_TAG = "MainActivity"
 
@@ -24,6 +25,7 @@ class MainActivity : AppCompatActivity()
     private var mapFragment: MapFragment = MapFragment()
     private var historyFragment: HistoryFragment = HistoryFragment.newInstance(3)
     private var sightFragment: SightFragment = SightFragment()
+    private var cameraViewFragment: CameraViewFragment = CameraViewFragment()
 
     private var lastFragment: Fragment? = null
 
@@ -31,8 +33,8 @@ class MainActivity : AppCompatActivity()
         Log.d(LOG_TAG, "onLoadingFragmentInteraction")
     }
 
-    override fun onMenuFragmentInteraction(uri: Uri) {
-        Log.d(LOG_TAG, "onMenuFragmentInteraction")
+    override fun onTakePhotoButtonClicked() {
+        cameraViewFragment.takePicture()
     }
 
     override fun onMapFragmentInteraction(uri: Uri) {
@@ -53,7 +55,8 @@ class MainActivity : AppCompatActivity()
 
     override fun gotoPhoto() {
         Log.d(LOG_TAG, "Going to Photo")
-        TODO("Implement photo screen.")
+        title = getString(R.string.title_fragment_camera)
+        setFragment(cameraViewFragment)
     }
 
     override fun gotoMap() {

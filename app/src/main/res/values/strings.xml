@@ -3,6 +3,7 @@
     <string name="title_activity_main">MainScreen</string>
     <string name="title_fragment_map">Map</string>
     <string name="title_fragment_history">History</string>
+    <string name="title_fragment_camera">Camera</string>
 
     <string name="hello_blank_fragment">Hello blank fragment</string>
 
@@ -17,7 +18,14 @@
     <string name="take_photo_button_description">Take Photo</string>
     <string name="goto_photo_button_description">Goto Photo</string>
 
+
     <string name="google_directions_api_key">AIzaSyCxPHc3awJKMgrJCqYm5oOgNIVppLA_CBE</string>
 
     <string name="plot_the_route">Построить маршрут</string>
+
+    <string name="picture_taken">Picture taken</string>
+    <string name="camera_permission_confirmation">This app demonstrates the usage of CameraView. In order to do that, it needs permission to access camera.</string>
+    <string name="camera_permission_not_granted">Camera app cannot do anything without camera permission.</string>
+    <string name="take_photo_not_allowed">No one sight in camera view</string>
+    <string name="textDialogClose">Close</string>
 </resources>
