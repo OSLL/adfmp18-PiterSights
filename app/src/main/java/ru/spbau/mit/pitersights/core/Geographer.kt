@@ -76,7 +76,7 @@ class Geographer {
                 leftNeighbors[sight.key] = sight.value
             }
         }
-        return leftNeighbors
+        return leftNeighbors.toList().slice(0 until 6).toMap()
     }
 
     fun getRightNearSights(player: Player, neighbors: Map<Sight, Float>): Map<Sight, Float> {
@@ -92,6 +92,6 @@ class Geographer {
                 rightNeighbors[sight.key] = sight.value
             }
         }
-        return rightNeighbors
+        return rightNeighbors.toList().slice(0 until 6).toMap()
     }
 }
