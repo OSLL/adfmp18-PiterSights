@@ -26,4 +26,5 @@
     <string name="camera_permission_not_granted">Camera app cannot do anything without camera permission.</string>
     <string name="take_photo_not_allowed">No one sight in camera view</string>
     <string name="textDialogClose">Close</string>
+    <string name="photo_taked_before">Photo had already taken</string>
 </resources>

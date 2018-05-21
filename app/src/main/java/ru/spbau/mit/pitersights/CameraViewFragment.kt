@@ -25,6 +25,7 @@ import android.support.v7.app.AlertDialog
 import android.view.*
 import android.widget.TextView
 import kotlinx.android.synthetic.main.fragment_camera.*
+import kotlinx.android.synthetic.main.fragment_loading.*
 import ru.spbau.mit.pitersights.core.Geographer
 import ru.spbau.mit.pitersights.core.Player
 import ru.spbau.mit.pitersights.core.Sight
@@ -38,8 +39,9 @@ class CameraViewFragment: Fragment(), ActivityCompat.OnRequestPermissionsResultC
     private var geographer: Geographer? = null
     private var player: Player? = null
 
-    private var leftSights = emptyArray<TextView>()
-    private var rightSights = emptyArray<TextView>()
+    private var leftNearSights = emptyMap<Sight, Float>()
+    private var rightNearSights = emptyMap<Sight, Float>()
+    private var nearSight: Sight? = null
 
     private val mCallback = object : CameraView.Callback() {
 
@@ -52,7 +54,6 @@ class CameraViewFragment: Fragment(), ActivityCompat.OnRequestPermissionsResultC
         }
 
         override fun onPictureTaken(cameraView: CameraView, data: ByteArray) {
-            // TODO neater fix.
             val textureView = cameraView.getChildAt(0) as TextureView
             val bitmap = textureView.getBitmap()
             callPreviewDialog(bitmap, data)
@@ -62,9 +63,8 @@ class CameraViewFragment: Fragment(), ActivityCompat.OnRequestPermissionsResultC
     private val mOnClickListener = View.OnClickListener { v ->
         when (v.id) {
             R.id.camera -> if (mCameraView != null) {
-                val isGeographerSaidYes = true // тут должны быть данные о достопримечательности, на которую мы смотрим
-                if (isGeographerSaidYes) {
-                    showDescription("Text description of sight must be here!")
+                if (nearSight != null) {
+                    showDescription(nearSight!!.getFullDescription())
                 }
             }
         }
@@ -94,19 +94,51 @@ class CameraViewFragment: Fragment(), ActivityCompat.OnRequestPermissionsResultC
     }
 
     override fun onPlayerLocationChanged() {
+        var changeState = false
         if (geographer != null && player != null) {
             val neighbors = geographer!!.calculateDistance(player!!)
-            // сортировать на левых и правых
-
+            val leftNearSights = geographer!!.getLeftNearSights(player!!, neighbors)
+            val rightNearSights = geographer!!.getRightNearSights(player!!, neighbors)
+            val nearSight = geographer!!.detectSight(player!!, neighbors)
+            if (this.leftNearSights != leftNearSights) {
+                this.leftNearSights = leftNearSights
+                changeState = true
+            }
+            if (this.rightNearSights != rightNearSights) {
+                this.rightNearSights = rightNearSights
+                changeState = true
+            }
+            if (this.nearSight != nearSight) {
+                this.nearSight = nearSight
+                changeState = true
+            }
         }
-        TODO("not implemented")
+        if (changeState) {
+            updateContent()
+        }
+    }
+
+    private fun updateContent() {
+        leftNeighbors.removeAllViews()
+        rightNeighbors.removeAllViews()
+        leftNearSights.forEach { key, value ->
+            val view = TextView(requireContext())
+            textView.setText(key.name + " " + value.toString())
+            leftNeighbors.addView(view)
+        }
+        rightNearSights.forEach { key, value ->
+            val view = TextView(requireContext())
+            textView.setText(key.name + " " + value.toString())
+            rightNeighbors.addView(view)
+        }
     }
 
     fun savePhoto(data: ByteArray) {
         Log.d(this.toString(), "onPictureTaken " + data.size)
         getBackgroundHandler().post(Runnable {
-            val file = File(requireContext().getExternalFilesDir(Environment.DIRECTORY_PICTURES),
-                    "picture.jpg")
+            val pathDir = requireContext().getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+            val photoName = "photo#" + nearSight!!.id + ".jpg"
+            val file = File(pathDir, photoName)
             var os: OutputStream? = null
             try {
                 os = FileOutputStream(file)
@@ -117,6 +149,7 @@ class CameraViewFragment: Fragment(), ActivityCompat.OnRequestPermissionsResultC
             } finally {
                 if (os != null) {
                     try {
+                        nearSight!!.photo = file.toString()
                         os.close()
                     } catch (e: IOException) {
                         Log.w(this.toString(), "Error while closing FileOutputStream", e)
@@ -144,11 +177,7 @@ class CameraViewFragment: Fragment(), ActivityCompat.OnRequestPermissionsResultC
         mCameraView = camera as CameraView
         mCameraView!!.addCallback(mCallback)
 
-        // тут нужно получить от географа ближайшие достопримечательности и внести их в
-        // leftSights и rightSights
-        leftSights.map { sight -> leftNeighbors.addView(sight) }
-        rightSights.map { sight -> rightNeighbors.addView(sight) }
-
+        updateContent()
         // добавить обработчик на клики по rightSights и leftSights
 
         mCameraView!!.setOnClickListener(mOnClickListener)
@@ -207,10 +236,14 @@ class CameraViewFragment: Fragment(), ActivityCompat.OnRequestPermissionsResultC
     }
 
     fun takePicture() {
-        Log.i("CameraViewFragment", "TakingPicture")
-        var geographerSaidYes = true // проверка геолокации и компаса должна быть здесь
-        if (geographerSaidYes) {
-            mCameraView!!.takePicture() // имя фото тоже надо передавать
+        if (nearSight != null) {
+            if (nearSight!!.photo.isEmpty()) {
+                Log.i("CameraViewFragment", "TakingPicture")
+                mCameraView!!.takePicture()
+            } else {
+                Toast.makeText(this.requireContext(), R.string.photo_taked_before,
+                        Toast.LENGTH_SHORT).show()
+            }
         } else {
             Toast.makeText(this.requireContext(), R.string.take_photo_not_allowed,
                     Toast.LENGTH_SHORT).show()
