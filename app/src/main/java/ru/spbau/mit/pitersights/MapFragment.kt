@@ -5,6 +5,7 @@ import android.content.Context
 import android.net.Uri
 import android.os.Bundle
 import android.support.v4.app.Fragment
+import android.support.v4.content.ContextCompat
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -110,7 +111,7 @@ class MapFragment : Fragment(), OnMapReadyCallback, Player.PlayerLocationListene
                         mCurrentRoute?.remove()
                         mCurrentRoute = mMap!!.addPolyline(PolylineOptions()
                                 .width(8.0f)
-                                .color(resources.getColor(R.color.routeColor, null))
+                                .color(ContextCompat.getColor(context!!, R.color.routeColor))
                                 .addAll(decodedPath))
                     }
 

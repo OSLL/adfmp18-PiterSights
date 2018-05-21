@@ -25,12 +25,18 @@ import android.support.v7.app.AlertDialog
 import android.view.*
 import android.widget.TextView
 import kotlinx.android.synthetic.main.fragment_camera.*
+import ru.spbau.mit.pitersights.core.Geographer
+import ru.spbau.mit.pitersights.core.Player
+import ru.spbau.mit.pitersights.core.Sight
 
-class CameraViewFragment: Fragment(), ActivityCompat.OnRequestPermissionsResultCallback {
+class CameraViewFragment: Fragment(), ActivityCompat.OnRequestPermissionsResultCallback, Player.PlayerLocationListener {
     private var mCameraView: CameraView? = null
     private val REQUEST_CAMERA_PERMISSION = 1
 
     private var mBackgroundHandler: Handler? = null
+
+    private var geographer: Geographer? = null
+    private var player: Player? = null
 
     private var leftSights = emptyArray<TextView>()
     private var rightSights = emptyArray<TextView>()
@@ -71,15 +77,29 @@ class CameraViewFragment: Fragment(), ActivityCompat.OnRequestPermissionsResultC
                 }).show()
 
         val textView = alert.findViewById<TextView>(android.R.id.message)
-        textView?.setTextColor(Color.WHITE);
-        textView?.setTextSize(19F);
-        textView?.setGravity(Gravity.CENTER);
+        textView?.setTextColor(Color.WHITE)
+        textView?.textSize = 19F
+        textView?.gravity = Gravity.CENTER
         alert.window.setBackgroundDrawableResource(android.R.color.transparent)
     }
 
     private fun callPreviewDialog(bitmap: Bitmap, data: ByteArray) {
         val previewDialog = PreviewDialogFragment(bitmap, data, this)
         previewDialog.show(this.requireFragmentManager(), "preview")
+    }
+
+    fun setGeographerAndPlayer(geographer: Geographer, player: Player) {
+        this.geographer = geographer
+        this.player = player
+    }
+
+    override fun onPlayerLocationChanged() {
+        if (geographer != null && player != null) {
+            val neighbors = geographer!!.calculateDistance(player!!)
+            // сортировать на левых и правых
+
+        }
+        TODO("not implemented")
     }
 
     fun savePhoto(data: ByteArray) {

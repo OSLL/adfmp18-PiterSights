@@ -7,9 +7,10 @@ import com.google.android.gms.maps.model.LatLng
 // TODO нам нужно откуда то извлекать позицию и описание, я пока не знаю откуда
 // TODO geoPosition structure.
 data class Sight(val name: String,
-            val description: List<String> = emptyList<String>(), // три элемента
-            val imageResource: Int,
-            val geoPosition: LatLng = LatLng(0.0, 0.0)) : Parcelable {
+                 val description: List<String> = emptyList(), // три элемента
+                 val imageResource: Int,
+                 val geoPosition: LatLng = LatLng(0.0, 0.0),
+                 val link: String) : Parcelable {
     val id = IdSetter.create(); get
 
     var _photo: String = ""
@@ -23,7 +24,8 @@ data class Sight(val name: String,
             parcel.readString(),
             parcel.createStringArrayList(),
             parcel.readInt(),
-            LatLng(parcel.readDouble(), parcel.readDouble())) {
+            LatLng(parcel.readDouble(), parcel.readDouble()),
+            parcel.readString()) {
         _photo = parcel.readString()
     }
 
@@ -53,15 +55,15 @@ data class Sight(val name: String,
         return 0
     }
 
-//    object CREATOR : Parcelable.Creator<Sight> {
-//        override fun createFromParcel(parcel: Parcel): Sight {
-//            return Sight(parcel)
-//        }
-//
-//        override fun newArray(size: Int): Array<Sight?> {
-//            return arrayOfNulls(size)
-//        }
-//    }
+    object CREATOR : Parcelable.Creator<Sight> {
+        override fun createFromParcel(parcel: Parcel): Sight {
+            return Sight(parcel)
+        }
+
+        override fun newArray(size: Int): Array<Sight?> {
+            return arrayOfNulls(size)
+        }
+    }
 }
 
 //data class Sights(private var sights: Map<Int, Sight> = emptyMap())
