@@ -6,13 +6,12 @@ import com.google.android.gms.maps.model.LatLng
 
 // TODO нам нужно откуда то извлекать позицию и описание, я пока не знаю откуда
 // TODO geoPosition structure.
-data class Sight(val name: String,
-                 val description: List<String> = emptyList(), // три элемента
-                 val imageResource: Int,
+data class Sight(val id: String,
+                 val name: String,
+                 private val shortDescription: String,
+                 private val longDescription: String,
                  val geoPosition: LatLng = LatLng(0.0, 0.0),
                  val link: String) : Parcelable {
-    val id = IdSetter.create(); get
-
     var _photo: String = ""
     var photo: String
         get() = _photo
@@ -22,30 +21,22 @@ data class Sight(val name: String,
 
     constructor(parcel: Parcel) : this(
             parcel.readString(),
-            parcel.createStringArrayList(),
-            parcel.readInt(),
+            parcel.readString(),
+            parcel.readString(),
+            parcel.readString(),
             LatLng(parcel.readDouble(), parcel.readDouble()),
             parcel.readString()) {
         _photo = parcel.readString()
     }
 
-    fun getFullDescription() = description.get(0)
-    fun getCameraDescription() = description.get(1)
-    fun getMapDescription() = description.get(2)
+    fun getFullDescription() = longDescription
+    fun getShortDescription() = shortDescription.split("\n")[0]
     fun isAddedToStorage() = !photo.isEmpty()
-
-    companion object IdSetter {
-        private var id = 0
-        fun create() {
-            id += 1
-            id
-        }
-    }
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
         parcel.writeString(name)
-        parcel.writeStringList(description)
-        parcel.writeInt(imageResource)
+        parcel.writeString(shortDescription)
+        parcel.writeString(longDescription)
         parcel.writeDouble(geoPosition.latitude)
         parcel.writeDouble(geoPosition.longitude)
         parcel.writeString(_photo)

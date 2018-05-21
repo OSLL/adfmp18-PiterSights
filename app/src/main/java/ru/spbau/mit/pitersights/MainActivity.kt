@@ -13,6 +13,7 @@ import ru.spbau.mit.pitersights.core.Player
 import ru.spbau.mit.pitersights.core.Sight
 import java.io.BufferedInputStream
 import java.io.BufferedReader
+import java.io.InputStream
 import java.io.InputStreamReader
 import java.util.Arrays.asList
 
@@ -103,7 +104,14 @@ class MainActivity : AppCompatActivity()
         val SIGHTS_FOLDER = "sights"
         val sightsFilenames = assets.list(SIGHTS_FOLDER)
 
-        val readSightFromFile: (String) -> Sight = { filename ->
+        val readSightFromFile: (String) -> Sight = { sightFilename ->
+            val filename = "$SIGHTS_FOLDER/$sightFilename"
+
+            val sightName: String = if (sightFilename.endsWith(".sight")) {
+                sightFilename.substringBefore(".sight")
+            } else {
+                sightFilename
+            }
             val inputStream = assets.open(filename)
             val bufferedReader = inputStream.bufferedReader()
 
@@ -120,13 +128,12 @@ class MainActivity : AppCompatActivity()
             val link = getLine()
             val splitter = getLine()
             assert(splitter.equals("==="))
-            val shortDescription: String = bufferedReader.readText()
-            val descriptions = asList(shortDescription, "Описание на камере", "Описание на карте")
-            Sight(label, descriptions, -1, LatLng(latitude, longitude), link)
+            val shortDescription = readTextTillDelimiter(bufferedReader)
+            val longDescription = bufferedReader.readText()
+            Sight(sightName, label, shortDescription, longDescription, LatLng(latitude, longitude), link)
         }
-        val sights = sightsFilenames.map {sightName ->
-            val filename = "${SIGHTS_FOLDER}/${sightName}"
-            readSightFromFile(filename)
+        val sights = sightsFilenames.map {sightFilename ->
+            readSightFromFile(sightFilename)
         }
 
         player = Player(applicationContext, this)
@@ -143,5 +150,20 @@ class MainActivity : AppCompatActivity()
         setFragment(loadingFragment, R.id.container, false)
         setFragment(menuFragment, R.id.menu_buttons_container, false)
         gotoMap()
+    }
+
+    private fun readTextTillDelimiter(bufferedReader: BufferedReader) : String {
+        var text = ""
+        while (true) {
+            if (bufferedReader.ready()) {
+                break
+            }
+            val line = bufferedReader.readLine()
+            if (line == "===") {
+                break
+            }
+            text += line + "\n"
+        }
+        return text
     }
 }
