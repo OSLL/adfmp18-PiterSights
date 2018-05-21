@@ -57,4 +57,12 @@ class Geographer {
 
         return closestSight
     }
+
+    fun getLeftNearSights(player: Player, neighbors: Map<Sight, Float>): Map<Sight, Float> {
+        return neighbors
+    }
+
+    fun getRightNearSights(player: Player, neighbors: Map<Sight, Float>): Map<Sight, Float> {
+        return neighbors
+    }
 }
