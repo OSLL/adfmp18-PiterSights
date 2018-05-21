@@ -64,10 +64,34 @@ class Geographer {
     }
 
     fun getLeftNearSights(player: Player, neighbors: Map<Sight, Float>): Map<Sight, Float> {
-        return neighbors
+        val playerLocation = player.geoLocation
+        val playerViewDirection = playerLocation!!.bearing
+        val leftNeighbors = mutableMapOf<Sight, Float>()
+        for (sight in neighbors) {
+            val heading = computeHeading(
+                    LatLng(playerLocation.latitude, playerLocation.longitude),
+                    sight.key.geoPosition
+            )
+            if (playerViewDirection - heading < 0) {
+                leftNeighbors[sight.key] = sight.value
+            }
+        }
+        return leftNeighbors
     }
 
     fun getRightNearSights(player: Player, neighbors: Map<Sight, Float>): Map<Sight, Float> {
-        return neighbors
+        val playerLocation = player.geoLocation
+        val playerViewDirection = playerLocation!!.bearing
+        val rightNeighbors = mutableMapOf<Sight, Float>()
+        for (sight in neighbors) {
+            val heading = computeHeading(
+                    LatLng(playerLocation.latitude, playerLocation.longitude),
+                    sight.key.geoPosition
+            )
+            if (heading - playerViewDirection < 0) {
+                rightNeighbors[sight.key] = sight.value
+            }
+        }
+        return rightNeighbors
     }
 }
