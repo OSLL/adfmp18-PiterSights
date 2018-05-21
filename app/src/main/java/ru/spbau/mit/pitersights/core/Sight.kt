@@ -24,7 +24,8 @@ data class Sight(val name: String,
             parcel.readString(),
             parcel.createStringArrayList(),
             parcel.readInt(),
-            LatLng(parcel.readDouble(), parcel.readDouble())) {
+            LatLng(parcel.readDouble(), parcel.readDouble()),
+            parcel.readString()) {
         _photo = parcel.readString()
     }
 
