@@ -55,7 +55,12 @@ class Geographer {
             }
         }
 
-        return closestSight
+        return if (closestSightDistance != null &&  closestSightDistance > 100.0f) {
+            null
+        } else {
+            closestSight
+        }
+
     }
 
     fun getLeftNearSights(player: Player, neighbors: Map<Sight, Float>): Map<Sight, Float> {
