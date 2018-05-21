@@ -7,6 +7,7 @@ import android.support.v7.app.AppCompatActivity
 import android.util.Log
 
 import kotlinx.android.synthetic.main.activity_main.*
+import ru.spbau.mit.pitersights.core.Geographer
 import ru.spbau.mit.pitersights.core.Player
 import ru.spbau.mit.pitersights.core.Sight
 
@@ -28,6 +29,8 @@ class MainActivity : AppCompatActivity()
     private var cameraViewFragment: CameraViewFragment = CameraViewFragment()
 
     private var lastFragment: Fragment? = null
+    private var player: Player? = null
+    private var geographer: Geographer? = null
 
     override fun onLoadingFragmentInteraction(uri: Uri) {
         Log.d(LOG_TAG, "onLoadingFragmentInteraction")
@@ -102,10 +105,15 @@ class MainActivity : AppCompatActivity()
                     )
                 }
         )
-        val player = Player(applicationContext, this)
+        player = Player(applicationContext, this)
         historyFragment.sights = sights
         mapFragment.sights = sights
         mapFragment.player = player
+
+        geographer = Geographer()
+        geographer!!.sights = sights
+
+        cameraViewFragment.setGeographerAndPlayer(geographer!!, player!!)
 
         setFragment(loadingFragment, R.id.container, false)
         setFragment(menuFragment, R.id.menu_buttons_container, false)

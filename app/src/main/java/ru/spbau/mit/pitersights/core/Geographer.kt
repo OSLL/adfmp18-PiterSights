@@ -7,7 +7,7 @@ import kotlin.math.abs
 
 class Geographer {
 
-    val sights : List<Sight> = emptyList()
+    var sights : List<Sight> = emptyList()
 
     private val aperture = 10.0f
     // надо еще компас всунуть сюда как-то
