@@ -120,7 +120,8 @@ class MapFragment : Fragment(), OnMapReadyCallback, Player.PlayerLocationListene
         })
 
         updatePlayerLocation()
-        updateLocationUI()
+        showCurrentPlace()
+//        updateLocationUI()
     }
 
     override fun onPlayerLocationChanged() {
@@ -140,7 +141,7 @@ class MapFragment : Fragment(), OnMapReadyCallback, Player.PlayerLocationListene
                     playerMarker = mMap!!.addMarker(
                             MarkerOptions()
                                     .position(LatLng(location.latitude, location.longitude))
-                                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.man))
+                                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.arrow))
                                     .snippet("Вы здесь")
                                     .rotation(location.bearing)
                                     .flat(true)
@@ -153,7 +154,7 @@ class MapFragment : Fragment(), OnMapReadyCallback, Player.PlayerLocationListene
                     playerMarker!!.rotation = location.bearing
                 }
 
-            showCurrentPlace()
+//            showCurrentPlace()
             } catch (e: SecurityException) {
                 Log.e("Exception: %s", e.message)
             }
