@@ -5,10 +5,15 @@ import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
+import com.google.android.gms.maps.model.LatLng
 
 import kotlinx.android.synthetic.main.activity_main.*
 import ru.spbau.mit.pitersights.core.Player
 import ru.spbau.mit.pitersights.core.Sight
+import java.io.BufferedInputStream
+import java.io.BufferedReader
+import java.io.InputStreamReader
+import java.util.Arrays.asList
 
 class MainActivity : AppCompatActivity()
         , LoadingFragment.OnLoadingFragmentInteractionListener
@@ -92,16 +97,35 @@ class MainActivity : AppCompatActivity()
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
 
-        val COUNT = 25
-        val description: String = resources.getString(R.string.sight_description)
-        val sights: MutableList<Sight> = MutableList(COUNT,
-                { _ -> Sight
-                    Sight(resources.getString(R.string.sight_label)
-                    , arrayListOf(description, description, description)
-                    , R.drawable.logo
-                    )
-                }
-        )
+        val SIGHTS_FOLDER = "sights"
+        val sightsFilenames = assets.list(SIGHTS_FOLDER)
+
+        val readSightFromFile: (String) -> Sight = { filename ->
+            val inputStream = assets.open(filename)
+            val bufferedReader = inputStream.bufferedReader()
+
+            val getLine: () -> String = {
+                bufferedReader.readLine()
+            }
+
+            val label = getLine()
+            val label_ru = getLine()
+            val label_en = getLine()
+            val coordinatesLines = getLine().split(" ")
+            val latitude = coordinatesLines[0].toDouble()
+            val longitude = coordinatesLines[1].toDouble()
+            val link = getLine()
+            val splitter = getLine()
+            assert(splitter.equals("==="))
+            val shortDescription: String = bufferedReader.readText()
+            val descriptions = asList(shortDescription, "Описание на камере", "Описание на карте")
+            Sight(label, descriptions, -1, LatLng(latitude, longitude), link)
+        }
+        val sights = sightsFilenames.map {sightName ->
+            val filename = "${SIGHTS_FOLDER}/${sightName}"
+            readSightFromFile(filename)
+        }
+
         val player = Player(applicationContext, this)
         historyFragment.sights = sights
         mapFragment.sights = sights
@@ -109,7 +133,6 @@ class MainActivity : AppCompatActivity()
 
         setFragment(loadingFragment, R.id.container, false)
         setFragment(menuFragment, R.id.menu_buttons_container, false)
-//        gotoHistory()
         gotoMap()
     }
 }
