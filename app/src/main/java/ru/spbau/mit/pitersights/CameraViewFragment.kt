@@ -99,7 +99,7 @@ class CameraViewFragment: Fragment(), ActivityCompat.OnRequestPermissionsResultC
             // сортировать на левых и правых
 
         }
-        TODO("not implemented") 
+        TODO("not implemented")
     }
 
     fun savePhoto(data: ByteArray) {
