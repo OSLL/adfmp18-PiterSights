@@ -153,7 +153,7 @@ class MapFragment : Fragment(), OnMapReadyCallback, Player.PlayerLocationListene
                     playerMarker!!.rotation = location.bearing
                 }
 
-//            showCurrentPlace()
+            showCurrentPlace()
             } catch (e: SecurityException) {
                 Log.e("Exception: %s", e.message)
             }
@@ -163,20 +163,16 @@ class MapFragment : Fragment(), OnMapReadyCallback, Player.PlayerLocationListene
 
     @SuppressLint("MissingPermission")
     private fun showCurrentPlace() {
-//        if (mLocationPermissionGranted) {
-            var currentLocation = player!!.geoLocation
-            while (currentLocation == null) {
-                currentLocation = player!!.geoLocation
-            }
-            val url = getUrl(
-                    currentLocation!!.latitude,
-                    currentLocation.longitude,
-                    "point_of_interest")
-            val getNearbyPlacesData = NearbyPlacesGetter()
-            getNearbyPlacesData.execute(mMap, url)
-//        } else {
-//            getLocationPermission()
-//        }
+        for (sight in sights) {
+            val markerOptions = MarkerOptions()
+            val placeName = sight.name
+            val latLng = sight.geoPosition
+            markerOptions.position(latLng)
+            markerOptions.title(placeName)
+            markerOptions.snippet(sight.getMapDescription())
+            markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.star_filled))
+            mMap!!.addMarker(markerOptions)
+        }
     }
 
     private fun getUrl(latitude: Double, longitude: Double, nearbyPlace: String): String {
