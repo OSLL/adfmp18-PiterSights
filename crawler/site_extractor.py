@@ -95,13 +95,16 @@ class ExtractorError(RuntimeError):
         super(ExtractorError, self).__init__(message)
         self.message = message
 
-OUTPUT_DIRECTORY = "/home/kravtsun/Dropbox/sights"
+
+OUTPUT_DIRECTORY = "sights/"
+
+
 if __name__ == '__main__':
     infos = get_infos()
     bad_records = []
     for i, d in enumerate(infos):
+        label = d['label']
         try:
-            label = d['label']
             # en_search = search(label, 'en')
             # if en_search is None:
             en_search = translit(label, reversed=True)
@@ -118,7 +121,9 @@ if __name__ == '__main__':
             if p is None:
                 raise ExtractorError('get_page')
             if d['short'] is None:
+                stderr.write(d['label'] + "does not have short description from site\n")
                 d['short'] = p.summary
+            d['long_description'] = p.summary
             try:
                 d['lat'] = float(p.coordinates[0])
                 d['long'] = float(p.coordinates[1])
@@ -128,7 +133,7 @@ if __name__ == '__main__':
             d['name'] = ''.join(filter(lambda c: c.isalnum() or c == '_', d['label_en'].replace(' ', '_')))
             if d['name'].startswith('List'):
                 print(d)
-            f = open('sights/' + d['name'] + '.sight', 'w')
+            f = open(OUTPUT_DIRECTORY + d['name'] + '.sight', 'w')
             f.write('\n'.join([
                 d['label'],
                 d['label_ru'],
@@ -137,11 +142,12 @@ if __name__ == '__main__':
                 d['url'],
                 '===',
                 d['short'],
+                '===',
+                d['long_description'],
             ]))
             f.close()
         except ExtractorError as e:
-            print(i)
-            stderr.write(e.message + '\n')
+            print(i, label, e.message)
             bad_records.append(d)
     f = open('bad_records.txt', 'w')
     f.write('\n'.join([str(record) for record in bad_records]))
