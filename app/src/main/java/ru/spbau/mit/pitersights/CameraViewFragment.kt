@@ -132,6 +132,7 @@ class CameraViewFragment: Fragment(), ActivityCompat.OnRequestPermissionsResultC
             view?.setTextColor(Color.WHITE)
             view?.textSize = 18F
             view?.gravity = Gravity.CENTER
+            view?.height = 100
             mLeftNeighbors.addView(view)
         }
         rightNearSights.forEach { (key, value) ->
@@ -140,6 +141,7 @@ class CameraViewFragment: Fragment(), ActivityCompat.OnRequestPermissionsResultC
             view?.setTextColor(Color.WHITE)
             view?.textSize = 18F
             view?.gravity = Gravity.CENTER
+            view?.height = 100
             mRightNeighbors.addView(view)
         }
     }
