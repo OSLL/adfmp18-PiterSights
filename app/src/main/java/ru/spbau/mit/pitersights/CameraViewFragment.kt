@@ -23,6 +23,7 @@ import android.os.Build
 import android.support.annotation.NonNull
 import android.support.v7.app.AlertDialog
 import android.view.*
+import android.widget.LinearLayout
 import android.widget.TextView
 import kotlinx.android.synthetic.main.fragment_camera.*
 import kotlinx.android.synthetic.main.fragment_loading.*
@@ -91,11 +92,12 @@ class CameraViewFragment: Fragment(), ActivityCompat.OnRequestPermissionsResultC
     fun setGeographerAndPlayer(geographer: Geographer, player: Player) {
         this.geographer = geographer
         this.player = player
+        this.player!!.registerLocationListener(this)
     }
 
     override fun onPlayerLocationChanged() {
         var changeState = false
-        if (geographer != null && player != null) {
+        if (this.isVisible && geographer != null && player != null) {
             val neighbors = geographer!!.calculateDistance(player!!)
             val leftNearSights = geographer!!.getLeftNearSights(player!!, neighbors)
             val rightNearSights = geographer!!.getRightNearSights(player!!, neighbors)
@@ -119,17 +121,26 @@ class CameraViewFragment: Fragment(), ActivityCompat.OnRequestPermissionsResultC
     }
 
     private fun updateContent() {
-        leftNeighbors.removeAllViews()
-        rightNeighbors.removeAllViews()
-        leftNearSights.forEach { key, value ->
+        val mLeftNeighbors = leftNeighbors as LinearLayout
+        mLeftNeighbors.removeAllViews()
+        val mRightNeighbors = rightNeighbors as LinearLayout
+        mRightNeighbors.removeAllViews()
+
+        leftNearSights.forEach { (key, value) ->
             val view = TextView(requireContext())
-            textView.setText(key.name + " " + value.toString())
-            leftNeighbors.addView(view)
+            view.setText(value.toInt().toString() + "m left")
+            view?.setTextColor(Color.WHITE)
+            view?.textSize = 18F
+            view?.gravity = Gravity.CENTER
+            mLeftNeighbors.addView(view)
         }
-        rightNearSights.forEach { key, value ->
+        rightNearSights.forEach { (key, value) ->
             val view = TextView(requireContext())
-            textView.setText(key.name + " " + value.toString())
-            rightNeighbors.addView(view)
+            view.setText(value.toInt().toString() + "m right")
+            view?.setTextColor(Color.WHITE)
+            view?.textSize = 18F
+            view?.gravity = Gravity.CENTER
+            mRightNeighbors.addView(view)
         }
     }
 
@@ -177,7 +188,6 @@ class CameraViewFragment: Fragment(), ActivityCompat.OnRequestPermissionsResultC
         mCameraView = camera as CameraView
         mCameraView!!.addCallback(mCallback)
 
-        updateContent()
         // добавить обработчик на клики по rightSights и leftSights
 
         mCameraView!!.setOnClickListener(mOnClickListener)

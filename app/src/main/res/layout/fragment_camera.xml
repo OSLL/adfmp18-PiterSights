@@ -18,21 +18,22 @@
 
     <LinearLayout
         android:id="@+id/leftNeighbors"
-        android:layout_width="95dp"
-        android:layout_height="match_parent"
+        android:layout_width="120dp"
+        android:layout_height="316dp"
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="true"
+        android:layout_marginTop="110dp"
         android:orientation="vertical">
 
     </LinearLayout>
 
     <LinearLayout
         android:id="@+id/rightNeighbors"
-        android:layout_width="95dp"
-        android:layout_height="match_parent"
+        android:layout_width="120dp"
+        android:layout_height="316dp"
         android:layout_alignParentEnd="true"
         android:layout_alignParentTop="true"
-        android:orientation="vertical">
-    </LinearLayout>
+        android:layout_marginTop="110dp"
+        android:orientation="vertical"></LinearLayout>
 
 </RelativeLayout>

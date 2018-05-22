@@ -4,6 +4,7 @@ import android.location.Location
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.SphericalUtil.computeHeading
 import kotlin.math.abs
+import kotlin.math.min
 
 class Geographer {
 
@@ -76,7 +77,7 @@ class Geographer {
                 leftNeighbors[sight.key] = sight.value
             }
         }
-        return leftNeighbors.toList().slice(0 until 6).toMap()
+        return leftNeighbors.toList().slice(0 until min(6, leftNeighbors.size)).toMap()
     }
 
     fun getRightNearSights(player: Player, neighbors: Map<Sight, Float>): Map<Sight, Float> {
@@ -92,6 +93,6 @@ class Geographer {
                 rightNeighbors[sight.key] = sight.value
             }
         }
-        return rightNeighbors.toList().slice(0 until 6).toMap()
+        return rightNeighbors.toList().slice(0 until min(6, rightNeighbors.size)).toMap()
     }
 }
