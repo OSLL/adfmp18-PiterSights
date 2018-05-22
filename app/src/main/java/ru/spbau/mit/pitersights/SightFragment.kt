@@ -40,8 +40,7 @@ class SightFragment : Fragment() {
         }
     }
 
-    fun setSight(sight: Sight) {
-        sight_preview_image.setImageResource(sight.imageResource)
+    private fun setSight(sight: Sight) {
         sight_preview_label.text = sight.name
         sight_preview_description.text = sight.getFullDescription()
     }

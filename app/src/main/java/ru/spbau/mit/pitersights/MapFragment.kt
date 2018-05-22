@@ -171,15 +171,7 @@ class MapFragment : Fragment(), OnMapReadyCallback, Player.PlayerLocationListene
             val latLng = sight.geoPosition
             markerOptions.position(latLng)
             markerOptions.title(placeName)
-            markerOptions.snippet("Это описание на карте. " +
-                    "Это описание на карте. " +
-                    "Это описание на карте. " +
-                    "Это описание на карте. " +
-                    "Это описание на карте. " +
-                    "Это описание на карте. " +
-                    "Это описание на карте. " +
-                    "Это описание на карте.")
-//            markerOptions.snippet(sight.getMapDescription())
+            markerOptions.snippet(sight.getShortDescription())
             markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.star_filled))
             mMap!!.addMarker(markerOptions)
         }
