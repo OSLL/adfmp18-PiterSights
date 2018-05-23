@@ -155,7 +155,7 @@ class MainActivity : AppCompatActivity()
     private fun readTextTillDelimiter(bufferedReader: BufferedReader) : String {
         var text = ""
         while (true) {
-            if (bufferedReader.ready()) {
+            if (!bufferedReader.ready()) {
                 break
             }
             val line = bufferedReader.readLine()

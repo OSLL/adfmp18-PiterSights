@@ -23,9 +23,10 @@ import android.os.Build
 import android.support.annotation.NonNull
 import android.support.v7.app.AlertDialog
 import android.view.*
+import android.widget.LinearLayout
+import android.widget.RelativeLayout
 import android.widget.TextView
 import kotlinx.android.synthetic.main.fragment_camera.*
-import kotlinx.android.synthetic.main.fragment_loading.*
 import ru.spbau.mit.pitersights.core.Geographer
 import ru.spbau.mit.pitersights.core.Player
 import ru.spbau.mit.pitersights.core.Sight
@@ -42,6 +43,7 @@ class CameraViewFragment: Fragment(), ActivityCompat.OnRequestPermissionsResultC
     private var leftNearSights = emptyMap<Sight, Float>()
     private var rightNearSights = emptyMap<Sight, Float>()
     private var nearSight: Sight? = null
+    private @Volatile var isShortDescriptionOpened = false
 
     private val mCallback = object : CameraView.Callback() {
 
@@ -66,8 +68,32 @@ class CameraViewFragment: Fragment(), ActivityCompat.OnRequestPermissionsResultC
                 if (nearSight != null) {
                     showDescription(nearSight!!.getFullDescription())
                 }
+                if (isShortDescriptionOpened) {
+                    isShortDescriptionOpened = false
+                    val mShortDescription = shortDescription as TextView
+                    mShortDescription.visibility = View.INVISIBLE
+                }
             }
         }
+    }
+
+    internal inner class mOnTextViewListener(val sight: Sight) : View.OnClickListener {
+
+        override fun onClick(v: View) {
+            val mShortDescription = shortDescription as TextView
+            mShortDescription.setText(sight.name)
+
+            val layoutParams = RelativeLayout.LayoutParams(
+                    RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT)
+
+            layoutParams.setMargins(v.left + v.width, v.top, 0, 0)
+            mShortDescription.setLayoutParams(layoutParams)
+            if (!isShortDescriptionOpened) {
+                isShortDescriptionOpened = true
+                mShortDescription.visibility = View.VISIBLE
+            }
+        }
+
     }
 
     private fun showDescription(text: String) {
@@ -91,11 +117,12 @@ class CameraViewFragment: Fragment(), ActivityCompat.OnRequestPermissionsResultC
     fun setGeographerAndPlayer(geographer: Geographer, player: Player) {
         this.geographer = geographer
         this.player = player
+        this.player!!.registerLocationListener(this)
     }
 
     override fun onPlayerLocationChanged() {
         var changeState = false
-        if (geographer != null && player != null) {
+        if (this.isVisible && !isShortDescriptionOpened && geographer != null && player != null) {
             val neighbors = geographer!!.calculateDistance(player!!)
             val leftNearSights = geographer!!.getLeftNearSights(player!!, neighbors)
             val rightNearSights = geographer!!.getRightNearSights(player!!, neighbors)
@@ -119,17 +146,28 @@ class CameraViewFragment: Fragment(), ActivityCompat.OnRequestPermissionsResultC
     }
 
     private fun updateContent() {
-        leftNeighbors.removeAllViews()
-        rightNeighbors.removeAllViews()
-        leftNearSights.forEach { key, value ->
+        val mLeftNeighbors = leftNeighbors as LinearLayout
+        mLeftNeighbors.removeAllViews()
+        val mRightNeighbors = rightNeighbors as LinearLayout
+        mRightNeighbors.removeAllViews()
+
+        fun setView(sight: Sight, dist: Float, bearing: String): TextView {
             val view = TextView(requireContext())
-            textView.setText(key.name + " " + value.toString())
-            leftNeighbors.addView(view)
+            view.setText(dist.toInt().toString() + "m " + bearing)
+            view?.setTextColor(Color.WHITE)
+            view?.textSize = 16F
+            view?.gravity = Gravity.CENTER
+            view?.height = 100
+            view?.setOnClickListener(mOnTextViewListener(sight))
+            return view
         }
-        rightNearSights.forEach { key, value ->
-            val view = TextView(requireContext())
-            textView.setText(key.name + " " + value.toString())
-            rightNeighbors.addView(view)
+
+        leftNearSights.forEach { (key, value) ->
+            mLeftNeighbors.addView(setView(key, value, "left"))
+        }
+
+        rightNearSights.forEach { (key, value) ->
+            mRightNeighbors.addView(setView(key, value, "right"))
         }
     }
 
@@ -176,12 +214,12 @@ class CameraViewFragment: Fragment(), ActivityCompat.OnRequestPermissionsResultC
         super.onViewCreated(view, savedInstanceState)
         mCameraView = camera as CameraView
         mCameraView!!.addCallback(mCallback)
-
-        updateContent()
-        // добавить обработчик на клики по rightSights и leftSights
-
         mCameraView!!.setOnClickListener(mOnClickListener)
 
+        val mShortDescription = shortDescription as TextView
+        mShortDescription.setTextColor(Color.WHITE)
+        mShortDescription.textSize = 18F
+        mShortDescription.gravity = Gravity.CENTER
     }
 
     override fun onResume() {

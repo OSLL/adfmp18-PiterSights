@@ -30,7 +30,15 @@ data class Sight(val id: String,
     }
 
     fun getFullDescription() = longDescription
-    fun getShortDescription() = shortDescription.split("\n")[0]
+
+    fun getShortDescription(): String {
+        var splitResult = shortDescription.split("\n")
+        while (splitResult.size > 1 && splitResult.last() == "") {
+            splitResult = splitResult.dropLast(1)
+        }
+        return splitResult[0]
+    }
+    
     fun isAddedToStorage() = !photo.isEmpty()
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
