@@ -104,11 +104,9 @@ class CameraViewFragment(): Fragment(), ActivityCompat.OnRequestPermissionsResul
     }
 
     private fun showDescription(text: String) {
-        isDescriptionOpened = true
         val alert =  AlertDialog.Builder(requireContext()).setMessage(text).setNegativeButton(
                 R.string.textDialogClose, DialogInterface.OnClickListener() { dialog, which ->
-                    dialog.dismiss();
-                    isDescriptionOpened = false
+                    dialog.dismiss()
                 }).show()
 
         val textView = alert.findViewById<TextView>(android.R.id.message)
