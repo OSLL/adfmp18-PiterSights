@@ -32,11 +32,13 @@ import ru.spbau.mit.pitersights.core.Geographer
 import ru.spbau.mit.pitersights.core.Player
 import ru.spbau.mit.pitersights.core.Sight
 
-class CameraViewFragment: Fragment(), ActivityCompat.OnRequestPermissionsResultCallback, Player.PlayerLocationListener {
+class CameraViewFragment(): Fragment(), ActivityCompat.OnRequestPermissionsResultCallback, Player.PlayerLocationListener {
     private var mCameraView: CameraView? = null
     private val REQUEST_CAMERA_PERMISSION = 1
 
     private var mBackgroundHandler: Handler? = null
+
+    private var compassFragment = CompassFragment()
 
     private var geographer: Geographer? = null
     private var player: Player? = null
@@ -78,13 +80,13 @@ class CameraViewFragment: Fragment(), ActivityCompat.OnRequestPermissionsResultC
         }
     }
 
-    internal inner class mOnTextViewListener(val sight: Sight, val direction: String) : View.OnClickListener {
+    internal inner class mOnTextViewListener(val sight: Sight) : View.OnClickListener {
         var size = Point()
         val display = activity!!.windowManager.defaultDisplay.getSize(size)
 
         override fun onClick(v: View) {
             val mShortDescription = shortDescription as TextView
-            mShortDescription.text = sight.name + " " + direction + "\n" + sight.getShortDescription()
+            mShortDescription.text = sight.name + "\n" + sight.getShortDescription()
 
             val layoutParams = RelativeLayout.LayoutParams(
                     RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT)
@@ -109,7 +111,7 @@ class CameraViewFragment: Fragment(), ActivityCompat.OnRequestPermissionsResultC
 
         val textView = alert.findViewById<TextView>(android.R.id.message)
         textView?.setTextColor(Color.WHITE)
-        textView?.textSize = 19F
+        textView?.textSize = 18F
         textView?.gravity = Gravity.CENTER
         alert.window.setBackgroundDrawableResource(android.R.color.transparent)
     }
@@ -123,6 +125,7 @@ class CameraViewFragment: Fragment(), ActivityCompat.OnRequestPermissionsResultC
         this.geographer = geographer
         this.player = player
         this.player!!.registerLocationListener(this)
+        compassFragment.player = this.player
     }
 
     override fun onPlayerLocationChanged() {
@@ -163,8 +166,7 @@ class CameraViewFragment: Fragment(), ActivityCompat.OnRequestPermissionsResultC
             view?.textSize = 16F
             view?.gravity = Gravity.CENTER
             view?.height = 100
-            val direction = if (bearing == "left") "<-" else "->"
-            view?.setOnClickListener(mOnTextViewListener(sight, direction))
+            view?.setOnClickListener(mOnTextViewListener(sight))
             return view
         }
 
@@ -227,6 +229,8 @@ class CameraViewFragment: Fragment(), ActivityCompat.OnRequestPermissionsResultC
         mShortDescription.textSize = 14F
         mShortDescription.gravity = Gravity.CENTER
 
+        val transaction = childFragmentManager.beginTransaction()
+        transaction.replace(R.id.compass_layout, compassFragment).commit()
     }
 
     override fun onResume() {

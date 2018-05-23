@@ -44,4 +44,15 @@
         android:layout_centerHorizontal="true"
         android:visibility="invisible" />
 
+    <FrameLayout
+        android:id="@+id/compass_layout"
+        android:layout_width="102dp"
+        android:layout_height="102dp"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginEnd="25dp"
+        android:layout_marginTop="25dp">
+
+    </FrameLayout>
+
 </RelativeLayout>
