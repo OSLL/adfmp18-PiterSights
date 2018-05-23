@@ -5,6 +5,7 @@ import android.content.DialogInterface
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Color
+import android.graphics.Point
 import android.os.Bundle
 import android.os.Environment
 import android.os.Handler
@@ -66,7 +67,7 @@ class CameraViewFragment: Fragment(), ActivityCompat.OnRequestPermissionsResultC
         when (v.id) {
             R.id.camera -> if (mCameraView != null) {
                 if (nearSight != null) {
-                    showDescription(nearSight!!.getFullDescription())
+                    showDescription(nearSight!!.name + "\n" + nearSight!!.getFullDescription())
                 }
                 if (isShortDescriptionOpened) {
                     isShortDescriptionOpened = false
@@ -77,17 +78,21 @@ class CameraViewFragment: Fragment(), ActivityCompat.OnRequestPermissionsResultC
         }
     }
 
-    internal inner class mOnTextViewListener(val sight: Sight) : View.OnClickListener {
+    internal inner class mOnTextViewListener(val sight: Sight, val direction: String) : View.OnClickListener {
+        var size = Point()
+        val display = activity!!.windowManager.defaultDisplay.getSize(size)
 
         override fun onClick(v: View) {
             val mShortDescription = shortDescription as TextView
-            mShortDescription.setText(sight.name)
+            mShortDescription.text = sight.name + " " + direction + "\n" + sight.getShortDescription()
 
             val layoutParams = RelativeLayout.LayoutParams(
                     RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT)
+            layoutParams.topMargin = v.top + leftNeighbors.top
+            layoutParams.leftMargin = leftNeighbors.right
 
-            layoutParams.setMargins(v.left + v.width, v.top, 0, 0)
-            mShortDescription.setLayoutParams(layoutParams)
+            layoutParams.width = size.x - rightNeighbors.width - leftNeighbors.width
+            mShortDescription.layoutParams = layoutParams
             if (!isShortDescriptionOpened) {
                 isShortDescriptionOpened = true
                 mShortDescription.visibility = View.VISIBLE
@@ -158,7 +163,8 @@ class CameraViewFragment: Fragment(), ActivityCompat.OnRequestPermissionsResultC
             view?.textSize = 16F
             view?.gravity = Gravity.CENTER
             view?.height = 100
-            view?.setOnClickListener(mOnTextViewListener(sight))
+            val direction = if (bearing == "left") "<-" else "->"
+            view?.setOnClickListener(mOnTextViewListener(sight, direction))
             return view
         }
 
@@ -218,8 +224,9 @@ class CameraViewFragment: Fragment(), ActivityCompat.OnRequestPermissionsResultC
 
         val mShortDescription = shortDescription as TextView
         mShortDescription.setTextColor(Color.WHITE)
-        mShortDescription.textSize = 18F
+        mShortDescription.textSize = 14F
         mShortDescription.gravity = Gravity.CENTER
+
     }
 
     override fun onResume() {
