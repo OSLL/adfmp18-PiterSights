@@ -119,6 +119,11 @@ class MapFragment : Fragment(), OnMapReadyCallback, Player.PlayerLocationListene
                 }
             }
         })
+        val success = googleMap.setMapStyle(MapStyleOptions(resources.getString(R.string.style_json)))
+
+        if (!success) {
+            Log.w("MAP", "Style parsing failed.");
+        }
 
         updatePlayerLocation()
         showCurrentPlace()
