@@ -11,6 +11,9 @@ import ru.spbau.mit.pitersights.HistoryFragment.OnHistoryFragmentInteractionList
 
 import kotlinx.android.synthetic.main.fragment_history.view.*
 import ru.spbau.mit.pitersights.core.Sight
+import android.graphics.BitmapFactory
+
+
 
 class HistoryRecyclerViewAdapter(
         private val mValues: List<Sight>,
@@ -35,15 +38,19 @@ class HistoryRecyclerViewAdapter(
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val item = mValues[position]
-        holder.labelView.text = item.name
-        holder.contentView.setImageResource(R.drawable.logo)
-//        holder.contentView.image
-//        holder.mIdView.text = item.id
-//        holder.mContentView.text = item.label
+        val sight = mValues[position]
+        holder.labelView.text = sight.name
+
+        val photoFile = mListener!!.getFileForSight(sight)
+        if (photoFile.exists()) {
+            val photoBitmap = BitmapFactory.decodeFile(photoFile.absolutePath)
+            holder.contentView.setImageBitmap(photoBitmap)
+        } else {
+            holder.contentView.setImageResource(R.drawable.logo)
+        }
 
         with(holder.mView) {
-            tag = item
+            tag = sight
             setOnClickListener(mOnClickListener)
         }
     }
@@ -51,8 +58,6 @@ class HistoryRecyclerViewAdapter(
     override fun getItemCount(): Int = mValues.size
 
     inner class ViewHolder(val mView: View) : RecyclerView.ViewHolder(mView) {
-//        val mIdView: TextView = mView.item_number
-//        val mContentView: TextView = mView.label
         val labelView: TextView = mView.history_text
         val contentView: ImageView = mView.history_image_content
 

@@ -7,7 +7,6 @@ import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.Point
 import android.os.Bundle
-import android.os.Environment
 import android.os.Handler
 import android.support.v4.app.ActivityCompat
 import android.support.v4.app.Fragment
@@ -185,9 +184,11 @@ class CameraViewFragment(): Fragment(), ActivityCompat.OnRequestPermissionsResul
     fun savePhoto(data: ByteArray) {
         Log.d(this.toString(), "onPictureTaken " + data.size)
         getBackgroundHandler().post(Runnable {
-            val pathDir = requireContext().getExternalFilesDir(Environment.DIRECTORY_PICTURES)
-            val photoName = "photo#" + nearSight!!.id + ".jpg"
-            val file = File(pathDir, photoName)
+            val interactionListener = activity as PhotoProvider
+            val pathDir = interactionListener.getPhotoDir()
+            val photoPath = interactionListener.getPathForSight(nearSight!!)
+            nearSight!!.photo = photoPath
+            val file = File(pathDir, photoPath)
             var os: OutputStream? = null
             try {
                 os = FileOutputStream(file)
@@ -198,13 +199,14 @@ class CameraViewFragment(): Fragment(), ActivityCompat.OnRequestPermissionsResul
             } finally {
                 if (os != null) {
                     try {
-                        nearSight!!.photo = file.toString()
+                        nearSight!!.photo = photoPath
                         os.close()
                     } catch (e: IOException) {
                         Log.w(this.toString(), "Error while closing FileOutputStream", e)
                     }
                 }
             }
+            nearSight!!.photo = photoPath
         })
     }
 

@@ -2,6 +2,7 @@ package ru.spbau.mit.pitersights
 
 import android.net.Uri
 import android.os.Bundle
+import android.os.Environment
 import android.support.v4.app.Fragment
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
@@ -11,11 +12,7 @@ import kotlinx.android.synthetic.main.activity_main.*
 import ru.spbau.mit.pitersights.core.Geographer
 import ru.spbau.mit.pitersights.core.Player
 import ru.spbau.mit.pitersights.core.Sight
-import java.io.BufferedInputStream
-import java.io.BufferedReader
-import java.io.InputStream
-import java.io.InputStreamReader
-import java.util.Arrays.asList
+import java.io.*
 
 class MainActivity : AppCompatActivity()
         , LoadingFragment.OnLoadingFragmentInteractionListener
@@ -23,7 +20,8 @@ class MainActivity : AppCompatActivity()
         , MapFragment.OnFragmentInteractionListener
         , HistoryFragment.OnHistoryFragmentInteractionListener
         , SightFragment.OnSightFragmentInteractionListener
-//        , CameraViewFragment.OnCameraFragmentInteractionListener
+        , PhotoProvider
+        , SightsChangedListener
 {
     private val LOG_TAG = "MainActivity"
 
@@ -34,6 +32,7 @@ class MainActivity : AppCompatActivity()
     private var sightFragment: SightFragment = SightFragment()
     private var cameraViewFragment: CameraViewFragment = CameraViewFragment()
 
+    private var sights: List<Sight>? = null
     private var lastFragment: Fragment? = null
     private var player: Player? = null
     private var geographer: Geographer? = null
@@ -44,6 +43,10 @@ class MainActivity : AppCompatActivity()
 
     override fun onTakePhotoButtonClicked() {
         cameraViewFragment.takePicture()
+    }
+
+    override fun onSightsChanged() {
+        historyFragment.sights = sights!!
     }
 
     override fun onMapFragmentInteraction(uri: Uri) {
@@ -82,6 +85,14 @@ class MainActivity : AppCompatActivity()
 
     override fun gotoAbout() {
         Log.d(LOG_TAG, "Going to About")
+    }
+
+    override fun getPhotoDir() : File {
+        return getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+    }
+
+    override fun getPathForSight(sight: Sight): String {
+        return "photo#" + sight.id + ".jpg"
     }
 
     private fun setFragment(fragment: Fragment, containerId: Int = R.id.container, addToBackStack: Boolean = true) {
@@ -130,20 +141,27 @@ class MainActivity : AppCompatActivity()
             assert(splitter.equals("==="))
             val shortDescription = readTextTillDelimiter(bufferedReader)
             val longDescription = bufferedReader.readText()
-            Sight(sightName, label, shortDescription, longDescription, LatLng(latitude, longitude), link)
+            val sight = Sight(sightName, label, shortDescription, longDescription, LatLng(latitude, longitude), link)
+            val photoDir = getPhotoDir()
+            val photoPath = getPathForSight(sight)
+            val photoFile = File(photoDir, photoPath)
+            if (photoFile.exists()) {
+                sight.photo = photoPath
+            }
+            sight
         }
-        val sights = sightsFilenames.map {sightFilename ->
+        sights = sightsFilenames.map {sightFilename ->
             readSightFromFile(sightFilename)
         }
 
         player = Player(applicationContext, this)
 
-        historyFragment.sights = sights
-        mapFragment.sights = sights
+        historyFragment.sights = sights!!
+        mapFragment.sights = sights!!
         mapFragment.player = player
 
         geographer = Geographer()
-        geographer!!.sights = sights
+        geographer!!.sights = sights!!
 
         cameraViewFragment.setGeographerAndPlayer(geographer!!, player!!)
 

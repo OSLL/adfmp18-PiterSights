@@ -10,6 +10,7 @@ import android.os.Bundle
 import android.support.annotation.NonNull
 import android.widget.ImageView
 import android.widget.Toast
+import kotlinx.android.synthetic.main.fragment_camera.*
 
 
 class PreviewDialogFragment(): DialogFragment() {
@@ -40,8 +41,8 @@ class PreviewDialogFragment(): DialogFragment() {
                 .setView(imageView)
                 .setPositiveButton(android.R.string.ok, { dialog, which ->
                     cameraViewFragment!!.savePhoto(args.getByteArray(ARG_DATA))
-                    Toast.makeText(activity, R.string.picture_taken, Toast.LENGTH_SHORT)
-                            .show()
+                    Toast.makeText(activity, R.string.picture_taken, Toast.LENGTH_SHORT).show()
+                    (activity as SightsChangedListener).onSightsChanged()
                 })
                 .setNegativeButton(android.R.string.cancel, { dialog, which ->
                     Toast.makeText(activity, args.getString(ARG_CANCEL), Toast.LENGTH_SHORT).show()
