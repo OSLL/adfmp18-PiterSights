@@ -4,7 +4,6 @@ import lxml
 import lxml.html.clean
 import requests
 import wikipedia as wp
-from sys import stderr
 from transliterate import translit
 
 
@@ -121,7 +120,7 @@ if __name__ == '__main__':
             if p is None:
                 raise ExtractorError('get_page')
             if d['short'] is None:
-                stderr.write(d['label'] + "does not have short description from site\n")
+                print(i, label, "does not have short description from site\n".format(d['label']))
                 d['short'] = p.summary
             d['long_description'] = p.summary
             try:
