@@ -46,7 +46,7 @@ class CameraViewFragment(): Fragment(), ActivityCompat.OnRequestPermissionsResul
     private var leftNearSights = emptyMap<Sight, Float>()
     private var rightNearSights = emptyMap<Sight, Float>()
     private var nearSight: Sight? = null
-    private @Volatile var isShortDescriptionOpened = false
+    private @Volatile var isDescriptionOpened = false
 
     private val mCallback = object : CameraView.Callback() {
 
@@ -71,8 +71,8 @@ class CameraViewFragment(): Fragment(), ActivityCompat.OnRequestPermissionsResul
                 if (nearSight != null) {
                     showDescription(nearSight!!.name + "\n" + nearSight!!.getFullDescription())
                 }
-                if (isShortDescriptionOpened) {
-                    isShortDescriptionOpened = false
+                if (isDescriptionOpened) {
+                    isDescriptionOpened = false
                     val mShortDescription = shortDescription as TextView
                     mShortDescription.visibility = View.INVISIBLE
                 }
@@ -95,8 +95,8 @@ class CameraViewFragment(): Fragment(), ActivityCompat.OnRequestPermissionsResul
 
             layoutParams.width = size.x - rightNeighbors.width - leftNeighbors.width
             mShortDescription.layoutParams = layoutParams
-            if (!isShortDescriptionOpened) {
-                isShortDescriptionOpened = true
+            if (!isDescriptionOpened) {
+                isDescriptionOpened = true
                 mShortDescription.visibility = View.VISIBLE
             }
         }
@@ -104,14 +104,16 @@ class CameraViewFragment(): Fragment(), ActivityCompat.OnRequestPermissionsResul
     }
 
     private fun showDescription(text: String) {
+        isDescriptionOpened = true
         val alert =  AlertDialog.Builder(requireContext()).setMessage(text).setNegativeButton(
                 R.string.textDialogClose, DialogInterface.OnClickListener() { dialog, which ->
                     dialog.dismiss();
+                    isDescriptionOpened = false
                 }).show()
 
         val textView = alert.findViewById<TextView>(android.R.id.message)
         textView?.setTextColor(Color.WHITE)
-        textView?.textSize = 18F
+        textView?.textSize = 16F
         textView?.gravity = Gravity.CENTER
         alert.window.setBackgroundDrawableResource(android.R.color.transparent)
     }
@@ -130,11 +132,14 @@ class CameraViewFragment(): Fragment(), ActivityCompat.OnRequestPermissionsResul
 
     override fun onPlayerLocationChanged() {
         var changeState = false
-        if (this.isVisible && !isShortDescriptionOpened && geographer != null && player != null) {
+        if (this.isVisible && !isDescriptionOpened && geographer != null && player != null) {
             val neighbors = geographer!!.calculateDistance(player!!)
+            val nearSight = geographer!!.detectSight(player!!, neighbors)
+            if (nearSight != null) {
+                neighbors.remove(nearSight)
+            }
             val leftNearSights = geographer!!.getLeftNearSights(player!!, neighbors)
             val rightNearSights = geographer!!.getRightNearSights(player!!, neighbors)
-            val nearSight = geographer!!.detectSight(player!!, neighbors)
             if (this.leftNearSights != leftNearSights) {
                 this.leftNearSights = leftNearSights
                 changeState = true

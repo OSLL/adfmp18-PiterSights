@@ -13,7 +13,7 @@ class Geographer {
     private val aperture = 10.0f
     // надо еще компас всунуть сюда как-то
 
-    fun calculateDistance(player: Player): Map<Sight, Float> {
+    fun calculateDistance(player: Player): MutableMap<Sight, Float> {
         val playerPosition = player.geoLocation
         val distances = mutableMapOf<Sight, Float>()
         for (sight in sights) {
@@ -28,8 +28,9 @@ class Geographer {
         return distances
                 .toList()
                 .sortedBy { (_, value) -> value }
-                .slice(0 until 10)
+                .slice(0 until 11)
                 .toMap()
+                .toMutableMap()
     }
 
     fun detectSight(player: Player, neighbors: Map<Sight, Float>): Sight? {
