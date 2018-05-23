@@ -1,6 +1,6 @@
 <resources>
     <string name="app_name">PiterSights</string>
-    <string name="title_activity_main">MainScreen</string>
+    <string name="title_activity_main">PiterSights</string>
     <string name="title_fragment_map">Map</string>
     <string name="title_fragment_history">History</string>
     <string name="title_fragment_camera">Camera</string>
