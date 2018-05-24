@@ -43,6 +43,7 @@ class SightFragment : Fragment() {
     private fun setSight(sight: Sight) {
         sight_preview_label.text = sight.name
         sight_preview_description.text = sight.getFullDescription()
+        listener!!.setImageOrLogo(sight_preview_image, sight)
     }
 
     override fun onDetach() {
@@ -50,7 +51,7 @@ class SightFragment : Fragment() {
         listener = null
     }
 
-    interface OnSightFragmentInteractionListener {
+    interface OnSightFragmentInteractionListener : PhotoProvider {
         fun onSightFragmentInteraction(uri: Uri)
     }
 }

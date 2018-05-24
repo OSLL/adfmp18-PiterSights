@@ -6,6 +6,7 @@ import android.support.v4.app.Fragment
 import android.support.v7.widget.GridLayoutManager
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -14,15 +15,29 @@ import ru.spbau.mit.pitersights.core.Sight
 class HistoryFragment : Fragment() {
     private var columnCount: Int = 1
 
-    var sights: List<Sight> = emptyList()
+    private fun updateAdapterWithView(view: RecyclerView) {
+        view.invalidate()
+        view.swapAdapter(HistoryRecyclerViewAdapter(sights, listener),  false)
+        view.invalidate()
+        view.swapAdapter(HistoryRecyclerViewAdapter(sights, listener),  true)
+        view.invalidate()
+        view.adapter.notifyDataSetChanged()
+        view.invalidate()
+    }
+
+    @Volatile var sights: List<Sight> = emptyList()
         set(value) {
-            field = value
+            field = sortSights(value)
             if (view != null) {
-                (view as RecyclerView).swapAdapter(HistoryRecyclerViewAdapter(sights, listener), true)
+                updateAdapterWithView(view as RecyclerView)
             }
         }
 
     private var listener: OnHistoryFragmentInteractionListener? = null
+
+    private fun sortSights(sights: List<Sight>) : List<Sight> {
+        return sights.sortedWith(Sight.COMPARATOR).reversed()
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -43,6 +58,7 @@ class HistoryFragment : Fragment() {
             }
             adapter = HistoryRecyclerViewAdapter(sights, listener)
         }
+        updateAdapterWithView(view)
         return view
     }
 
@@ -60,7 +76,7 @@ class HistoryFragment : Fragment() {
         listener = null
     }
 
-    interface OnHistoryFragmentInteractionListener {
+    interface OnHistoryFragmentInteractionListener : PhotoProvider {
         fun onHistoryFragmentInteraction(sight: Sight?)
     }
 

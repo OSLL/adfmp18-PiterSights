@@ -1,7 +1,6 @@
 package ru.spbau.mit.pitersights
 
 import android.content.Context
-import android.net.Uri
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.util.Log
@@ -13,9 +12,9 @@ import kotlinx.android.synthetic.main.fragment_menu.*
 
 
 class MenuFragment : Fragment() {
-    private var listener: OnMenuFragmentInteractionListener? = null
-    private var menuButtonClicked: Boolean = false
-    private lateinit var changeModeButton: ChangeModeButton
+    internal var listener: OnMenuFragmentInteractionListener? = null
+    internal var menuButtonClicked: Boolean = false
+    internal lateinit var changeModeButton: ChangeModeButton
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -105,7 +104,7 @@ class MenuFragment : Fragment() {
         if (context is OnMenuFragmentInteractionListener) {
             listener = context
         } else {
-            throw RuntimeException(context.toString() + " must implement OnTestFragmentInteractionListener")
+            throw RuntimeException(context.toString() + " must implement OnMenuFragmentInteractionListener")
         }
     }
 

@@ -7,7 +7,6 @@ import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.Point
 import android.os.Bundle
-import android.os.Environment
 import android.os.Handler
 import android.support.v4.app.ActivityCompat
 import android.support.v4.app.Fragment
@@ -32,11 +31,13 @@ import ru.spbau.mit.pitersights.core.Geographer
 import ru.spbau.mit.pitersights.core.Player
 import ru.spbau.mit.pitersights.core.Sight
 
-class CameraViewFragment: Fragment(), ActivityCompat.OnRequestPermissionsResultCallback, Player.PlayerLocationListener {
+class CameraViewFragment(): Fragment(), ActivityCompat.OnRequestPermissionsResultCallback, Player.PlayerLocationListener {
     private var mCameraView: CameraView? = null
     private val REQUEST_CAMERA_PERMISSION = 1
 
     private var mBackgroundHandler: Handler? = null
+
+    private var compassFragment = CompassFragment()
 
     private var geographer: Geographer? = null
     private var player: Player? = null
@@ -44,7 +45,7 @@ class CameraViewFragment: Fragment(), ActivityCompat.OnRequestPermissionsResultC
     private var leftNearSights = emptyMap<Sight, Float>()
     private var rightNearSights = emptyMap<Sight, Float>()
     private var nearSight: Sight? = null
-    private @Volatile var isShortDescriptionOpened = false
+    private @Volatile var isDescriptionOpened = false
 
     private val mCallback = object : CameraView.Callback() {
 
@@ -69,8 +70,8 @@ class CameraViewFragment: Fragment(), ActivityCompat.OnRequestPermissionsResultC
                 if (nearSight != null) {
                     showDescription(nearSight!!.name + "\n" + nearSight!!.getFullDescription())
                 }
-                if (isShortDescriptionOpened) {
-                    isShortDescriptionOpened = false
+                if (isDescriptionOpened) {
+                    isDescriptionOpened = false
                     val mShortDescription = shortDescription as TextView
                     mShortDescription.visibility = View.INVISIBLE
                 }
@@ -78,13 +79,13 @@ class CameraViewFragment: Fragment(), ActivityCompat.OnRequestPermissionsResultC
         }
     }
 
-    internal inner class mOnTextViewListener(val sight: Sight, val direction: String) : View.OnClickListener {
+    internal inner class mOnTextViewListener(val sight: Sight) : View.OnClickListener {
         var size = Point()
         val display = activity!!.windowManager.defaultDisplay.getSize(size)
 
         override fun onClick(v: View) {
             val mShortDescription = shortDescription as TextView
-            mShortDescription.text = sight.name + " " + direction + "\n" + sight.getShortDescription()
+            mShortDescription.text = sight.name + "\n" + sight.getShortDescription()
 
             val layoutParams = RelativeLayout.LayoutParams(
                     RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT)
@@ -93,8 +94,8 @@ class CameraViewFragment: Fragment(), ActivityCompat.OnRequestPermissionsResultC
 
             layoutParams.width = size.x - rightNeighbors.width - leftNeighbors.width
             mShortDescription.layoutParams = layoutParams
-            if (!isShortDescriptionOpened) {
-                isShortDescriptionOpened = true
+            if (!isDescriptionOpened) {
+                isDescriptionOpened = true
                 mShortDescription.visibility = View.VISIBLE
             }
         }
@@ -104,12 +105,12 @@ class CameraViewFragment: Fragment(), ActivityCompat.OnRequestPermissionsResultC
     private fun showDescription(text: String) {
         val alert =  AlertDialog.Builder(requireContext()).setMessage(text).setNegativeButton(
                 R.string.textDialogClose, DialogInterface.OnClickListener() { dialog, which ->
-                    dialog.dismiss();
+                    dialog.dismiss()
                 }).show()
 
         val textView = alert.findViewById<TextView>(android.R.id.message)
         textView?.setTextColor(Color.WHITE)
-        textView?.textSize = 19F
+        textView?.textSize = 16F
         textView?.gravity = Gravity.CENTER
         alert.window.setBackgroundDrawableResource(android.R.color.transparent)
     }
@@ -123,15 +124,19 @@ class CameraViewFragment: Fragment(), ActivityCompat.OnRequestPermissionsResultC
         this.geographer = geographer
         this.player = player
         this.player!!.registerLocationListener(this)
+        compassFragment.player = this.player
     }
 
     override fun onPlayerLocationChanged() {
         var changeState = false
-        if (this.isVisible && !isShortDescriptionOpened && geographer != null && player != null) {
+        if (this.isVisible && !isDescriptionOpened && geographer != null && player != null) {
             val neighbors = geographer!!.calculateDistance(player!!)
+            val nearSight = geographer!!.detectSight(player!!, neighbors)
+            if (nearSight != null) {
+                neighbors.remove(nearSight)
+            }
             val leftNearSights = geographer!!.getLeftNearSights(player!!, neighbors)
             val rightNearSights = geographer!!.getRightNearSights(player!!, neighbors)
-            val nearSight = geographer!!.detectSight(player!!, neighbors)
             if (this.leftNearSights != leftNearSights) {
                 this.leftNearSights = leftNearSights
                 changeState = true
@@ -163,8 +168,7 @@ class CameraViewFragment: Fragment(), ActivityCompat.OnRequestPermissionsResultC
             view?.textSize = 16F
             view?.gravity = Gravity.CENTER
             view?.height = 100
-            val direction = if (bearing == "left") "<-" else "->"
-            view?.setOnClickListener(mOnTextViewListener(sight, direction))
+            view?.setOnClickListener(mOnTextViewListener(sight))
             return view
         }
 
@@ -180,9 +184,11 @@ class CameraViewFragment: Fragment(), ActivityCompat.OnRequestPermissionsResultC
     fun savePhoto(data: ByteArray) {
         Log.d(this.toString(), "onPictureTaken " + data.size)
         getBackgroundHandler().post(Runnable {
-            val pathDir = requireContext().getExternalFilesDir(Environment.DIRECTORY_PICTURES)
-            val photoName = "photo#" + nearSight!!.id + ".jpg"
-            val file = File(pathDir, photoName)
+            val interactionListener = activity as PhotoProvider
+            val pathDir = interactionListener.getPhotoDir()
+            val photoPath = interactionListener.getPathForSight(nearSight!!)
+            nearSight!!.photo = photoPath
+            val file = File(pathDir, photoPath)
             var os: OutputStream? = null
             try {
                 os = FileOutputStream(file)
@@ -193,13 +199,14 @@ class CameraViewFragment: Fragment(), ActivityCompat.OnRequestPermissionsResultC
             } finally {
                 if (os != null) {
                     try {
-                        nearSight!!.photo = file.toString()
+                        nearSight!!.photo = photoPath
                         os.close()
                     } catch (e: IOException) {
                         Log.w(this.toString(), "Error while closing FileOutputStream", e)
                     }
                 }
             }
+            nearSight!!.photo = photoPath
         })
     }
 
@@ -227,6 +234,8 @@ class CameraViewFragment: Fragment(), ActivityCompat.OnRequestPermissionsResultC
         mShortDescription.textSize = 14F
         mShortDescription.gravity = Gravity.CENTER
 
+        val transaction = childFragmentManager.beginTransaction()
+        transaction.replace(R.id.compass_layout, compassFragment).commit()
     }
 
     override fun onResume() {

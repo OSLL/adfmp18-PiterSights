@@ -3,6 +3,7 @@ package ru.spbau.mit.pitersights.core
 import android.os.Parcel
 import android.os.Parcelable
 import com.google.android.gms.maps.model.LatLng
+import java.util.*
 
 // TODO нам нужно откуда то извлекать позицию и описание, я пока не знаю откуда
 // TODO geoPosition structure.
@@ -12,12 +13,8 @@ data class Sight(val id: String,
                  private val longDescription: String,
                  val geoPosition: LatLng = LatLng(0.0, 0.0),
                  val link: String) : Parcelable {
-    var _photo: String = ""
-    var photo: String
-        get() = _photo
-        set(value) {
-            _photo = value
-        }
+    @Volatile var photo: String = ""
+    var photoDate: Date? = null
 
     constructor(parcel: Parcel) : this(
             parcel.readString(),
@@ -26,7 +23,7 @@ data class Sight(val id: String,
             parcel.readString(),
             LatLng(parcel.readDouble(), parcel.readDouble()),
             parcel.readString()) {
-        _photo = parcel.readString()
+        photo = parcel.readString()
     }
 
     fun getFullDescription() = longDescription
@@ -47,7 +44,7 @@ data class Sight(val id: String,
         parcel.writeString(longDescription)
         parcel.writeDouble(geoPosition.latitude)
         parcel.writeDouble(geoPosition.longitude)
-        parcel.writeString(_photo)
+        parcel.writeString(photo)
     }
 
     override fun describeContents(): Int {
@@ -62,6 +59,28 @@ data class Sight(val id: String,
         override fun newArray(size: Int): Array<Sight?> {
             return arrayOfNulls(size)
         }
+    }
+
+    object COMPARATOR : Comparator<Sight> {
+//        val random = Random()
+        override fun compare(o1: Sight?, o2: Sight?): Int {
+            if (o1 == null) {
+                return if (o2 == null) 0 else -1
+            }
+            if (o2 == null) {
+                return -1
+            }
+
+            // with photos weight more.
+            if (o1.photo.isEmpty() != o2.photo.isEmpty()) {
+                return if (o2.photo.isEmpty()) 1 else -1
+            }
+
+//             In alphabetical order reversed.
+            return o2.name.compareTo(o1.name)
+//            return random.nextInt(3) - 1
+        }
+
     }
 }
 

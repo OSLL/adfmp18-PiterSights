@@ -76,10 +76,10 @@ def get_page(d):
 
     def try_different(suffix=''):
         try:
-            p = wp.page(label + suffix)
+            p = wp.page(ru_label + suffix)
         except exception:
             try:
-                p = wp.page(ru_label + suffix)
+                p = wp.page(label + suffix)
             except exception:
                 p = None
         return p
