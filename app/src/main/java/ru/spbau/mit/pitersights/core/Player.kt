@@ -55,7 +55,8 @@ class Player(private val context: Context?, private val activity: Activity) :
                 currentTime.time - lastUpdateTime.time
         )
         if (timeDiff > 1) {
-            geoLocation = location
+            geoLocation!!.longitude = location!!.longitude
+            geoLocation!!.latitude = location.latitude
             lastUpdateTime = currentTime
             for (l in locationListeners) {
                 l.onPlayerLocationChanged()
