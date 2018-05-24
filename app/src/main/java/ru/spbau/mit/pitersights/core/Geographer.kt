@@ -10,9 +10,6 @@ class Geographer {
 
     var sights : List<Sight> = emptyList()
 
-    private val aperture = 80.0f
-    // надо еще компас всунуть сюда как-то
-
     fun calculateDistance(player: Player): MutableMap<Sight, Float> {
         val playerPosition = player.geoLocation
         val distances = mutableMapOf<Sight, Float>()
@@ -35,7 +32,10 @@ class Geographer {
 
     fun detectSight(player: Player, neighbors: Map<Sight, Float>): Sight? {
         val playerLocation = player.geoLocation
-        val playerViewDirection = playerLocation!!.bearing
+        var playerViewDirection = playerLocation!!.bearing
+        if (playerViewDirection > 180) {
+            playerViewDirection -= 360
+        }
         val sights = neighbors.keys
         val sightsInView = mutableSetOf<Sight>()
         for (sight in neighbors) {
@@ -43,8 +43,8 @@ class Geographer {
                     LatLng(playerLocation.latitude, playerLocation.longitude),
                     sight.key.geoPosition
             )
-            heading += 360
-            if (abs(heading - playerViewDirection) < aperture / 2) {
+            val aperture = getAperture(sight.value)
+            if (abs(heading - playerViewDirection) < aperture) {
                 sightsInView.add(sight.key)
             }
         }
@@ -68,15 +68,33 @@ class Geographer {
 
     fun getLeftNearSights(player: Player, neighbors: Map<Sight, Float>): Map<Sight, Float> {
         val playerLocation = player.geoLocation
-        val playerViewDirection = playerLocation!!.bearing
+        var playerViewDirection = playerLocation!!.bearing
+        if (playerViewDirection > 180) {
+            playerViewDirection -= 360
+        }
+
+        val opposite: Float = if (playerViewDirection < 0) {
+            playerViewDirection + 180
+        } else {
+            playerViewDirection + 180
+        }
+
         val leftNeighbors = mutableMapOf<Sight, Float>()
         for (sight in neighbors) {
             val heading = computeHeading(
                     LatLng(playerLocation.latitude, playerLocation.longitude),
                     sight.key.geoPosition
             )
-            if (playerViewDirection - heading < 0) {
-                leftNeighbors[sight.key] = sight.value
+
+            if (playerViewDirection < 0) {
+                if (-180 < heading && heading < playerViewDirection
+                || opposite < heading && heading < 180) {
+                    leftNeighbors[sight.key] = sight.value
+                }
+            } else {
+                if (opposite < heading && heading < playerViewDirection) {
+                    leftNeighbors[sight.key] = sight.value
+                }
             }
         }
         return leftNeighbors.toList().slice(0 until min(6, leftNeighbors.size)).toMap()
@@ -84,17 +102,39 @@ class Geographer {
 
     fun getRightNearSights(player: Player, neighbors: Map<Sight, Float>): Map<Sight, Float> {
         val playerLocation = player.geoLocation
-        val playerViewDirection = playerLocation!!.bearing
+        var playerViewDirection = playerLocation!!.bearing
+        if (playerViewDirection > 180) {
+            playerViewDirection -= 360
+        }
+
+        val opposite: Float = if (playerViewDirection < 0) {
+            playerViewDirection + 180
+        } else {
+            playerViewDirection + 180
+        }
         val rightNeighbors = mutableMapOf<Sight, Float>()
         for (sight in neighbors) {
             val heading = computeHeading(
                     LatLng(playerLocation.latitude, playerLocation.longitude),
                     sight.key.geoPosition
             )
-            if (heading - playerViewDirection < 0) {
-                rightNeighbors[sight.key] = sight.value
+
+            if (playerViewDirection < 0) {
+                if (playerViewDirection < heading && heading < opposite) {
+                    rightNeighbors[sight.key] = sight.value
+                }
+            } else {
+                if (-180 < heading && heading < opposite
+                        || playerViewDirection < heading && heading < 180) {
+                    rightNeighbors[sight.key] = sight.value
+                }
             }
         }
         return rightNeighbors.toList().slice(0 until min(6, rightNeighbors.size)).toMap()
+    }
+
+    private fun getAperture(distance: Float): Float {
+        val apertureInRadians = Math.atan(50 / distance.toDouble())
+        return Math.toDegrees(apertureInRadians).toFloat()
     }
 }
