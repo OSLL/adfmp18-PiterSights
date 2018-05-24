@@ -29,7 +29,7 @@ class DataParser {
         return getPlaces(jsonArray!!)
     }
 
-    private fun getPlaces(jsonArray: JSONArray): List<HashMap<String, String>> {
+    internal fun getPlaces(jsonArray: JSONArray): List<HashMap<String, String>> {
         val placesCount = jsonArray.length()
         val placesList = ArrayList<HashMap<String, String>>()
         var placeMap: HashMap<String, String>? = null
@@ -50,7 +50,7 @@ class DataParser {
         return placesList
     }
 
-    private fun getPlace(googlePlaceJson: JSONObject): HashMap<String, String> {
+    internal fun getPlace(googlePlaceJson: JSONObject): HashMap<String, String> {
         val googlePlaceMap = HashMap<String, String>()
         var placeName = "-NA-"
         var vicinity = "-NA-"
