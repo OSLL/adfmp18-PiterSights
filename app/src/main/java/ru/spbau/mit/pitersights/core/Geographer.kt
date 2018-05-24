@@ -10,7 +10,7 @@ class Geographer {
 
     var sights : List<Sight> = emptyList()
 
-    private val aperture = 10.0f
+    private val aperture = 80.0f
     // надо еще компас всунуть сюда как-то
 
     fun calculateDistance(player: Player): MutableMap<Sight, Float> {
@@ -38,13 +38,14 @@ class Geographer {
         val playerViewDirection = playerLocation!!.bearing
         val sights = neighbors.keys
         val sightsInView = mutableSetOf<Sight>()
-        for (sight in sights) {
-            val heading = computeHeading(
+        for (sight in neighbors) {
+            var heading = computeHeading(
                     LatLng(playerLocation.latitude, playerLocation.longitude),
-                    sight.geoPosition
+                    sight.key.geoPosition
             )
-            if (abs(90 - heading - playerViewDirection) < aperture / 2) {
-                sightsInView.add(sight)
+            heading += 360
+            if (abs(heading - playerViewDirection) < aperture / 2) {
+                sightsInView.add(sight.key)
             }
         }
 
