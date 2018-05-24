@@ -14,7 +14,7 @@ import ru.spbau.mit.pitersights.core.Player
 
 class CompassFragment: Fragment(), Player.PlayerLocationListener {
     internal var player: Player? = null
-    private var arrowView: ImageView? = null
+    private var compassView: ImageView? = null
     private var currentAzimuth = 0.0f
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -24,7 +24,7 @@ class CompassFragment: Fragment(), Player.PlayerLocationListener {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        arrowView = view.findViewById(R.id.compass_arrow)
+        compassView = view.findViewById(R.id.compass)
 
     }
 
@@ -41,16 +41,16 @@ class CompassFragment: Fragment(), Player.PlayerLocationListener {
     override fun onPlayerLocationChanged() {
         val location = player!!.geoLocation
         val azimuth = location!!.bearing
-        val compassAnimation = RotateAnimation(currentAzimuth, azimuth,
+        val compassAnimation = RotateAnimation(currentAzimuth, -azimuth,
                 Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF,
                 0.5f)
-        currentAzimuth = azimuth
+        currentAzimuth = -azimuth
 
         compassAnimation.duration = 500
         compassAnimation.repeatCount = 0
         compassAnimation.fillAfter = true
 
-        arrowView?.startAnimation(compassAnimation)
+        compassView?.startAnimation(compassAnimation)
     }
 
     interface OnCompassFragmentInteractionListener {

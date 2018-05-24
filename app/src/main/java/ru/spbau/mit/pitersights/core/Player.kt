@@ -84,11 +84,18 @@ class Player(private val context: Context?, private val activity: Activity) : Lo
             val timeDiff = currentTime.time - lastUpdateTime.time
             val alpha = 0.97f
             if (event.sensor == accelerometer) {
+//                mLastAccelerometer[0] = event.values[0]
+//                mLastAccelerometer[1] = event.values[1]
+//                mLastAccelerometer[2] = event.values[2]
                 mLastAccelerometer[0] = alpha * mLastAccelerometer[0] + (1 - alpha) * event.values[0]
                 mLastAccelerometer[1] = alpha * mLastAccelerometer[1] + (1 - alpha) * event.values[1]
                 mLastAccelerometer[2] = alpha * mLastAccelerometer[2] + (1 - alpha) * event.values[2]
                 mLastAccelerometerSet = true
             } else if (event.sensor == magnetometer) {
+//                mLastMagnetometer[0] = event.values[0]
+//                mLastMagnetometer[1] = event.values[1]
+//                mLastMagnetometer[2] = event.values[2]
+
                 mLastMagnetometer[0] = alpha * mLastMagnetometer[0] + (1 - alpha) * event.values[0]
                 mLastMagnetometer[1] = alpha * mLastMagnetometer[1] + (1 - alpha) * event.values[1]
                 mLastMagnetometer[2] = alpha * mLastMagnetometer[2] + (1 - alpha) * event.values[2]
@@ -99,8 +106,24 @@ class Player(private val context: Context?, private val activity: Activity) : Lo
                 SensorManager.getRotationMatrix(mR, null, mLastAccelerometer, mLastMagnetometer)
                 SensorManager.getOrientation(mR, mOrientation)
                 val azimuthInRadians = mOrientation[0]
-                val azimuthInDegress = Math.toDegrees(azimuthInRadians.toDouble()) % 360
-                geoLocation!!.bearing = azimuthInDegress.toFloat()
+                val azimuthInDegrees = Math.toDegrees(azimuthInRadians.toDouble())
+                val pitchInRadians = mOrientation[1]
+                val pitchInDegrees = Math.toDegrees(pitchInRadians.toDouble())
+                var angleInRadians = 0.0;
+//                if (pitchInDegrees < 0) {
+//                    angleInRadians = Math.acos(
+//                            Math.cos(azimuthInRadians.toDouble()) * Math.cos(pitchInRadians.toDouble() /
+//                                    (Math.sin(azimuthInRadians.toDouble()) * Math.sin(pitchInRadians.toDouble())) - 1)
+//                    )
+//                } else {
+//                    angleInRadians = Math.acos(
+//                            Math.cos(azimuthInRadians.toDouble()) * Math.cos(pitchInRadians.toDouble() /
+//                                    (1 - Math.sin(azimuthInRadians.toDouble()) * Math.sin(pitchInRadians.toDouble())))
+//                    )
+//                }
+
+                val angleInDegress = Math.toDegrees(azimuthInRadians.toDouble()) % 360
+                geoLocation!!.bearing = angleInDegress.toFloat()
                 for (l in locationListeners) {
                     l.onPlayerLocationChanged()
                 }
