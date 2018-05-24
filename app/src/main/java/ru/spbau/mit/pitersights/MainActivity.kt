@@ -1,5 +1,6 @@
 package ru.spbau.mit.pitersights
 
+import android.content.res.Configuration
 import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
@@ -9,6 +10,7 @@ import android.util.Log
 import com.google.android.gms.maps.model.LatLng
 
 import kotlinx.android.synthetic.main.activity_main.*
+import org.jetbrains.annotations.NotNull
 import ru.spbau.mit.pitersights.core.Geographer
 import ru.spbau.mit.pitersights.core.Player
 import ru.spbau.mit.pitersights.core.Sight
@@ -32,10 +34,15 @@ class MainActivity : AppCompatActivity()
     private var sightFragment: SightFragment = SightFragment()
     private var cameraViewFragment: CameraViewFragment = CameraViewFragment()
 
+    private val SIGHTS_FOLDER = "sights"
     private var sights: List<Sight>? = null
     private var lastFragment: Fragment? = null
     private var player: Player? = null
     private var geographer: Geographer? = null
+
+    fun getSights() = sights!!
+    fun getPlayer() = player!!
+    fun getGeographer() = geographer!!
 
     override fun onLoadingFragmentInteraction(uri: Uri) {
         Log.d(LOG_TAG, "onLoadingFragmentInteraction")
@@ -107,68 +114,67 @@ class MainActivity : AppCompatActivity()
         Log.d("MainActivity", "setting fragment: " + fragment.toString())
     }
 
+    fun initializeVariables() {
+        if (sights == null) {
+            val sightsFilenames = assets.list(SIGHTS_FOLDER)
+            sights = sightsFilenames.map { sightFilename ->
+                readSightFromFile(sightFilename)
+            }
+            player = Player(applicationContext, this)
+            geographer = Geographer()
+            geographer!!.sights = sights!!
+        }
+    }
+
+    private fun readSightFromFile(sightFilename: String) :  Sight {
+        val filename = "$SIGHTS_FOLDER/$sightFilename"
+
+        val sightName: String = if (sightFilename.endsWith(".sight")) {
+            sightFilename.substringBefore(".sight")
+        } else {
+            sightFilename
+        }
+        val inputStream = assets.open(filename)
+        val bufferedReader = inputStream.bufferedReader()
+
+        val getLine: () -> String = {
+            bufferedReader.readLine()
+        }
+
+        val label = getLine()
+        val label_ru = getLine()
+        val label_en = getLine()
+        val coordinatesLines = getLine().split(" ")
+        val latitude = coordinatesLines[0].toDouble()
+        val longitude = coordinatesLines[1].toDouble()
+        val link = getLine()
+        val splitter = getLine()
+        assert(splitter.equals("==="))
+        val shortDescription = readTextTillDelimiter(bufferedReader)
+        val longDescription = bufferedReader.readText()
+        val sight = Sight(sightName, label, shortDescription, longDescription, LatLng(latitude, longitude), link)
+        val photoDir = getPhotoDir()
+        val photoPath = getPathForSight(sight)
+        val photoFile = File(photoDir, photoPath)
+        if (photoFile.exists()) {
+            sight.photo = photoPath
+        }
+        return sight
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
 
-        val SIGHTS_FOLDER = "sights"
-        val sightsFilenames = assets.list(SIGHTS_FOLDER)
-
-        val readSightFromFile: (String) -> Sight = { sightFilename ->
-            val filename = "$SIGHTS_FOLDER/$sightFilename"
-
-            val sightName: String = if (sightFilename.endsWith(".sight")) {
-                sightFilename.substringBefore(".sight")
-            } else {
-                sightFilename
-            }
-            val inputStream = assets.open(filename)
-            val bufferedReader = inputStream.bufferedReader()
-
-            val getLine: () -> String = {
-                bufferedReader.readLine()
-            }
-
-            val label = getLine()
-            val label_ru = getLine()
-            val label_en = getLine()
-            val coordinatesLines = getLine().split(" ")
-            val latitude = coordinatesLines[0].toDouble()
-            val longitude = coordinatesLines[1].toDouble()
-            val link = getLine()
-            val splitter = getLine()
-            assert(splitter.equals("==="))
-            val shortDescription = readTextTillDelimiter(bufferedReader)
-            val longDescription = bufferedReader.readText()
-            val sight = Sight(sightName, label, shortDescription, longDescription, LatLng(latitude, longitude), link)
-            val photoDir = getPhotoDir()
-            val photoPath = getPathForSight(sight)
-            val photoFile = File(photoDir, photoPath)
-            if (photoFile.exists()) {
-                sight.photo = photoPath
-            }
-            sight
-        }
-        sights = sightsFilenames.map {sightFilename ->
-            readSightFromFile(sightFilename)
-        }
-
-        player = Player(applicationContext, this)
-
+        initializeVariables()
         historyFragment.sights = sights!!
-        mapFragment.sights = sights!!
-        mapFragment.player = player
-
-        geographer = Geographer()
-        geographer!!.sights = sights!!
-
-        cameraViewFragment.setGeographerAndPlayer(geographer!!, player!!)
 
         setFragment(loadingFragment, R.id.container, false)
         setFragment(menuFragment, R.id.menu_buttons_container, false)
         gotoMap()
     }
+
 
     private fun readTextTillDelimiter(bufferedReader: BufferedReader) : String {
         var text = ""

@@ -30,6 +30,8 @@ class CompassFragment: Fragment(), Player.PlayerLocationListener {
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
+        val camera = parentFragment as CameraViewFragment
+        player = camera.getPlayer()
         player!!.registerLocationListener(this)
     }
 

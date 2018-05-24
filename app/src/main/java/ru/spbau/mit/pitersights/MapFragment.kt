@@ -250,6 +250,10 @@ class MapFragment : Fragment(), OnMapReadyCallback, Player.PlayerLocationListene
         if (context !is OnFragmentInteractionListener) {
             throw RuntimeException(context.toString() + " must implement OnLoadingFragmentInteractionListener")
         }
+        val mainActivity = activity as MainActivity
+        mainActivity.initializeVariables()
+        sights = mainActivity.getSights()
+        player = mainActivity.getPlayer()
         player!!.registerLocationListener(this)
     }
 

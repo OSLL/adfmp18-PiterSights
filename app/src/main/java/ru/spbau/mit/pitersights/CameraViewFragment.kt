@@ -1,8 +1,10 @@
 package ru.spbau.mit.pitersights
 
 import android.Manifest
+import android.content.Context
 import android.content.DialogInterface
 import android.content.pm.PackageManager
+import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.Point
@@ -46,6 +48,8 @@ class CameraViewFragment(): Fragment(), ActivityCompat.OnRequestPermissionsResul
     private var rightNearSights = emptyMap<Sight, Float>()
     private var nearSight: Sight? = null
     private @Volatile var isDescriptionOpened = false
+
+    fun getPlayer() = player!!
 
     private val mCallback = object : CameraView.Callback() {
 
@@ -124,7 +128,6 @@ class CameraViewFragment(): Fragment(), ActivityCompat.OnRequestPermissionsResul
         this.geographer = geographer
         this.player = player
         this.player!!.registerLocationListener(this)
-        compassFragment.player = this.player
     }
 
     override fun onPlayerLocationChanged() {
@@ -219,6 +222,13 @@ class CameraViewFragment(): Fragment(), ActivityCompat.OnRequestPermissionsResul
         return mBackgroundHandler as Handler
     }
 
+    override fun onAttach(context: Context?) {
+        super.onAttach(context)
+        val mainActivity = activity as MainActivity
+        mainActivity.initializeVariables()
+        setGeographerAndPlayer(mainActivity.getGeographer(), mainActivity.getPlayer())
+    }
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_camera, container, false)
     }
@@ -262,7 +272,6 @@ class CameraViewFragment(): Fragment(), ActivityCompat.OnRequestPermissionsResul
     }
 
     override fun onDestroy() {
-        // нужно что-то делать с поворотом
         super.onDestroy()
         if (mBackgroundHandler != null) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
@@ -271,6 +280,9 @@ class CameraViewFragment(): Fragment(), ActivityCompat.OnRequestPermissionsResul
                 mBackgroundHandler!!.looper.quit()
             }
             mBackgroundHandler = null
+        }
+        if (player != null) {
+            player!!.unregisterLocationListener(this)
         }
     }
 
