@@ -103,14 +103,11 @@ class MainActivity : AppCompatActivity()
     }
 
     private fun setFragment(fragment: Fragment, containerId: Int = R.id.container, addToBackStack: Boolean = true) {
-        if (fragment == lastFragment)
-            return
-        val transaction = getSupportFragmentManager().beginTransaction().replace(containerId, fragment)
+        val transaction = supportFragmentManager.beginTransaction().replace(containerId, fragment)
         if (addToBackStack) {
             transaction.addToBackStack(null)
         }
         transaction.commit()
-        lastFragment = fragment
         Log.d("MainActivity", "setting fragment: " + fragment.toString())
     }
 
@@ -189,5 +186,9 @@ class MainActivity : AppCompatActivity()
             text += line + "\n"
         }
         return text
+    }
+
+    override fun onBackPressed() {
+        super.onBackPressed()
     }
 }

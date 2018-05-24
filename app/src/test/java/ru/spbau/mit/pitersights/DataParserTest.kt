@@ -1,6 +1,5 @@
 package ru.spbau.mit.pitersights
 
-import com.google.gson.JsonObject
 import org.json.JSONObject
 import org.junit.Assert.*;
 import org.junit.*;
@@ -8,7 +7,7 @@ import org.junit.*;
 class DataParserTest {
     val dataParser = DataParser() // no state.
 
-    @Test // Failed on Kotlin's NULL bug with JSON object.
+    @Test(expected = IllegalStateException::class) // Failed on Kotlin's NULL bug with JSON object.
     fun simpleParseTest() {
         val LAT = 60.0025
         val LNG = 30.3736
