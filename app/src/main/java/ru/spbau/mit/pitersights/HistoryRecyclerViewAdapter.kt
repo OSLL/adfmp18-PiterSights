@@ -40,15 +40,7 @@ class HistoryRecyclerViewAdapter(
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val sight = mValues[position]
         holder.labelView.text = sight.name
-
-        val photoFile = mListener!!.getFileForSight(sight)
-        if (photoFile.exists()) {
-            val photoBitmap = BitmapFactory.decodeFile(photoFile.absolutePath)
-            holder.contentView.setImageBitmap(photoBitmap)
-        } else {
-            holder.contentView.setImageResource(R.drawable.logo)
-        }
-
+        mListener!!.setImageOrLogo(holder.contentView, sight)
         with(holder.mView) {
             tag = sight
             setOnClickListener(mOnClickListener)
