@@ -40,7 +40,7 @@ class HistoryRecyclerViewAdapter(
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val sight = mValues[position]
         holder.labelView.text = sight.name
-        mListener!!.setImageOrLogo(holder.contentView, sight)
+        mListener!!.setImageOrLogo(holder.contentView, sight, true)
         with(holder.mView) {
             tag = sight
             setOnClickListener(mOnClickListener)

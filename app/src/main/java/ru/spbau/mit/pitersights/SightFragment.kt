@@ -43,7 +43,7 @@ class SightFragment : Fragment() {
     private fun setSight(sight: Sight) {
         sight_preview_label.text = sight.name
         sight_preview_description.text = sight.getFullDescription()
-        listener!!.setImageOrLogo(sight_preview_image, sight)
+        listener!!.setImageOrLogo(sight_preview_image, sight, false)
     }
 
     override fun onDetach() {

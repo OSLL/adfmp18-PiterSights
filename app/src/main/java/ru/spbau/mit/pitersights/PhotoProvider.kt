@@ -14,13 +14,5 @@ interface PhotoProvider {
         return File(getPhotoDir(), getPathForSight(sight))
     }
 
-    fun setImageOrLogo(view: ImageView, sight: Sight) {
-        val photoFile = getFileForSight(sight)
-        if (photoFile.exists()) {
-            val photoBitmap = BitmapFactory.decodeFile(photoFile.absolutePath)
-            view.setImageBitmap(photoBitmap)
-        } else {
-            view.setImageResource(R.drawable.logo)
-        }
-    }
+    fun setImageOrLogo(view: ImageView, sight: Sight, isPreview: Boolean);
 }

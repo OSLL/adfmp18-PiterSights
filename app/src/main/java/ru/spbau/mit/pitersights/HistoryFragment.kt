@@ -16,6 +16,7 @@ class HistoryFragment : Fragment() {
     private var columnCount: Int = 1
 
     private fun updateAdapterWithView(view: RecyclerView) {
+        Log.d("HISTORY", "updateAdapterWithView")
         view.invalidate()
         view.swapAdapter(HistoryRecyclerViewAdapter(sights, listener),  false)
         view.invalidate()
