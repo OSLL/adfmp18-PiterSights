@@ -25,7 +25,6 @@
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="8dp"
-        android:text="Sample description"
         android:textAppearance="?attr/textAppearanceListItem"
         android:textSize="5pt"
         app:layout_constraintTop_toBottomOf="@+id/history_image_content"

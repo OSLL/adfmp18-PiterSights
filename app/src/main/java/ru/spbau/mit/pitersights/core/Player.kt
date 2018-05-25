@@ -1,5 +1,6 @@
 package ru.spbau.mit.pitersights.core
 
+import android.annotation.TargetApi
 import android.app.Activity
 import android.content.Context
 import android.content.pm.PackageManager
@@ -9,6 +10,7 @@ import android.os.Bundle
 import android.support.v4.app.ActivityCompat
 import android.util.Log
 import android.location.LocationManager
+import android.os.Build
 import com.hoan.dsensor_master.DProcessedSensor
 import com.hoan.dsensor_master.DSensorEvent
 import com.hoan.dsensor_master.DSensorManager
@@ -104,6 +106,7 @@ class Player(private val context: Context?, private val activity: Activity) :
         }
     }
 
+    @TargetApi(Build.VERSION_CODES.M)
     private fun getLocationPermission() {
         if (context?.let {
                     ActivityCompat.checkSelfPermission(it,

@@ -5,6 +5,7 @@ import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
+import android.os.Handler
 import android.support.v4.app.Fragment
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
@@ -12,14 +13,10 @@ import android.widget.ImageView
 import com.google.android.gms.maps.model.LatLng
 
 import kotlinx.android.synthetic.main.activity_main.*
-import org.jetbrains.annotations.NotNull
 import ru.spbau.mit.pitersights.core.Geographer
 import ru.spbau.mit.pitersights.core.Player
 import ru.spbau.mit.pitersights.core.Sight
 import java.io.*
-import android.graphics.Bitmap
-
-
 
 class MainActivity : AppCompatActivity()
         , LoadingFragment.OnLoadingFragmentInteractionListener
@@ -41,7 +38,6 @@ class MainActivity : AppCompatActivity()
 
     private val SIGHTS_FOLDER = "sights"
     private var sights: List<Sight>? = null
-    private var lastFragment: Fragment? = null
     private var player: Player? = null
     private var geographer: Geographer? = null
 
@@ -103,7 +99,6 @@ class MainActivity : AppCompatActivity()
         return getExternalFilesDir(Environment.DIRECTORY_PICTURES)
     }
 
-
 //    https://developer.android.com/topic/performance/graphics/load-bitmap
     private fun calculateInSampleSize(options: BitmapFactory.Options, reqWidth: Int, reqHeight: Int): Int {
         // Raw height and width of image
@@ -123,20 +118,6 @@ class MainActivity : AppCompatActivity()
             }
         }
         return inSampleSize
-    }
-
-    private fun decodeSampledBitmapFromFile(filePath: String, reqWidth: Int, reqHeight: Int): Bitmap {
-        // First decode with inJustDecodeBounds=true to check dimensions
-        val options = BitmapFactory.Options()
-        options.inJustDecodeBounds = true
-        val photoBitmap = BitmapFactory.decodeFile(filePath, options)
-
-        // Calculate inSampleSize
-        options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight)
-
-        // Decode bitmap with inSampleSize set
-        options.inJustDecodeBounds = false
-        return BitmapFactory.decodeFile(filePath, options)
     }
 
     override fun setImageOrLogo(view: ImageView, sight: Sight, isPreview: Boolean) {
@@ -237,7 +218,11 @@ class MainActivity : AppCompatActivity()
 
         setFragment(loadingFragment, R.id.container, false)
         setFragment(menuFragment, R.id.menu_buttons_container, false)
-        gotoMap()
+
+        // enjoy our loading screen
+        Handler().postDelayed(Runnable {
+            gotoMap()
+        }, 3000)
     }
 
 

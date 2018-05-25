@@ -5,8 +5,6 @@
     <string name="title_fragment_history">History</string>
     <string name="title_fragment_camera">Camera</string>
 
-    <string name="hello_blank_fragment">Hello blank fragment</string>
-
     <string name="sight_label">Here is sight label</string>
     <string name="sight_description">Here is sight description</string>
     <string name="navigate_to">Navigate to</string>
