@@ -27,7 +27,7 @@
             android:paddingTop="16dp"
             android:paddingBottom="0dp"
             android:src="@drawable/logo"
-            android:contentDescription="SightPhoto" />
+            android:contentDescription="@string/sight_photo_content_description" />
 
         <TextView
             android:id="@+id/sight_preview_label"

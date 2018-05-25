@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">PiterSights</string>
+    <string name="title_fragment_map">Карта</string>
+    <string name="title_fragment_history">История</string>
+    <string name="title_fragment_camera">Камера</string>
+    <string name="sight_label">Название</string>
+    <string name="sight_description">Описание</string>
+    <string name="navigate_to">Перейти к...</string>
+    <string name="menu_button_description">Меню</string>
+    <string name="photo_button_description">Фото</string>
+    <string name="map_button_description">Карта</string>
+    <string name="history_button_description">История</string>
+    <string name="about_button_description">О нас</string>
+    <string name="take_photo_button_description">Сделать фото</string>
+    <string name="goto_photo_button_description">Перейти к фото</string>
+    <string name="plot_the_route">Построить маршрут</string>
+    <string name="picture_taken">Снимок сделан</string>
+    <string name="camera_permission_confirmation">Для съемки достопримечательностей требуется разрешение на доступ к камере</string>
+    <string name="camera_permission_not_granted">Приложение не будет интересным без разрешения на доступ к камере :(</string>
+    <string name="take_photo_not_allowed">Нет достопримечательностей в поле зрения :\'(</string>
+    <string name="textDialogClose">Закрыть</string>
+    <string name="photo_taked_before">Снимок этой достопримечательности уже сделан</string>
+    <string name="title_fragment_loading">Загрузка...</string>
+    <string name="metres_short">м</string>
+    <string name="right_bearing">вправо</string>
+    <string name="left_bearing">влево</string>
+    <string name="main_menu_title">Главное меню</string>
+    <string name="sight_photo_content_description">Фото достопримечательности</string>
+</resources>

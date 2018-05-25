@@ -166,7 +166,7 @@ class CameraViewFragment(): Fragment(), ActivityCompat.OnRequestPermissionsResul
 
         fun setView(sight: Sight, dist: Float, bearing: String): TextView {
             val view = TextView(requireContext())
-            view.setText(dist.toInt().toString() + "m " + bearing)
+            view.text = dist.toInt().toString() + getString(R.string.metres_short) + " " + bearing
             view?.setTextColor(Color.WHITE)
             view?.textSize = 16F
             view?.gravity = Gravity.CENTER
@@ -176,11 +176,11 @@ class CameraViewFragment(): Fragment(), ActivityCompat.OnRequestPermissionsResul
         }
 
         leftNearSights.forEach { (key, value) ->
-            mLeftNeighbors.addView(setView(key, value, "left"))
+            mLeftNeighbors.addView(setView(key, value, getString(R.string.left_bearing)))
         }
 
         rightNearSights.forEach { (key, value) ->
-            mRightNeighbors.addView(setView(key, value, "right"))
+            mRightNeighbors.addView(setView(key, value, getString(R.string.right_bearing)))
         }
     }
 

@@ -1,9 +1,10 @@
 <resources>
-    <string name="app_name">PiterSights</string>
-    <string name="title_activity_main">PiterSights</string>
+    <string name="app_name" translatable="false">PiterSights</string>
+    <string name="title_activity_main" translatable="false">PiterSights</string>
     <string name="title_fragment_map">Map</string>
     <string name="title_fragment_history">History</string>
     <string name="title_fragment_camera">Camera</string>
+    <string name="title_fragment_loading">Loading...</string>
 
     <string name="sight_label">Here is sight label</string>
     <string name="sight_description">Here is sight description</string>
@@ -16,7 +17,7 @@
     <string name="take_photo_button_description">Take Photo</string>
     <string name="goto_photo_button_description">Goto Photo</string>
 
-    <string name="google_directions_api_key">AIzaSyCxPHc3awJKMgrJCqYm5oOgNIVppLA_CBE</string>
+    <string name="google_directions_api_key" translatable="false">AIzaSyCxPHc3awJKMgrJCqYm5oOgNIVppLA_CBE</string>
     <string name="plot_the_route">Plot the route</string>
 
     <string name="picture_taken">Picture taken</string>
@@ -25,4 +26,10 @@
     <string name="take_photo_not_allowed">No one sight in camera view</string>
     <string name="textDialogClose">Close</string>
     <string name="photo_taked_before">Photo had already taken</string>
+    <string name="left_bearing">left</string>
+    <string name="right_bearing">right</string>
+    <string name="metres_short">m</string>
+    <string name="main_menu_title">MenuMain</string>
+    <string name="sight_photo_content_description">SightPhoto</string>
+    <string name="defaultimageview">defaultImageView</string>
 </resources>

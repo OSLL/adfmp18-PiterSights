@@ -12,7 +12,7 @@
         android:layout_width="@dimen/history_preview_image_size"
         android:layout_height="@dimen/history_preview_image_size"
         android:layout_margin="@dimen/history_preview_image_margin"
-        android:contentDescription="defaultImageView"
+        android:contentDescription="@string/defaultimageview"
         android:src="@drawable/logo"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
