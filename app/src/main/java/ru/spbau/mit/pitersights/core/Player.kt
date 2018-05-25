@@ -72,12 +72,15 @@ class Player(private val context: Context?, private val activity: Activity) :
     override fun onProcessedValueChanged(dSensorEvent: DSensorEvent?) {
         val angleInRadians = dSensorEvent!!.values[0]
         val angleInDegrees = Math.toDegrees(angleInRadians.toDouble())
+        if (geoLocation == null) {
+            Log.w("PLAYER", "geoLocation is unexpectedly null")
+            getPlayerLocation()
+        }
         geoLocation!!.bearing = angleInDegrees.toFloat()
         for (l in locationListeners) {
             l.onPlayerLocationChanged()
         }
     }
-
 
     private fun getPlayerLocation() {
         try {

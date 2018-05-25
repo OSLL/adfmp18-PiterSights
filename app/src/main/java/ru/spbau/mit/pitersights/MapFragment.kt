@@ -66,7 +66,9 @@ class MapFragment : Fragment(), OnMapReadyCallback, Player.PlayerLocationListene
 
 
     override fun onSaveInstanceState(outState: Bundle) {
-        outState.putParcelable(KEY_CAMERA_POSITION, mMap!!.cameraPosition)
+        if (mMap != null) {
+            outState.putParcelable(KEY_CAMERA_POSITION, mMap!!.cameraPosition)
+        }
         super.onSaveInstanceState(outState)
     }
 
